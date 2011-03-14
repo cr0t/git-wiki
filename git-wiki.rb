@@ -182,18 +182,35 @@ __END__
 %html
   %head
     %title= title
+    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
+    = '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
+    = '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
+    = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
+    = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
+    = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
   %body
-    %ul
-      %li
-        %a{ :href => "/#{GitWiki.homepage}" } Home
-      %li
-        %a{ :href => "/pages" } All pages
-    #content= yield
+    #wrap
+      #main.container.page
+        = yield
+    #footer.container
+      .span-24.last
+        = 'Code based on <a href="https://github.com/sr/git-wiki" target="_blank">git-wiki</a> project.'
+    #topmenu
+      .container
+        .span-10
+          %a{ :href => "/#{GitWiki.homepage}" } wiki.summercode.com
+        .span-6
+          %a{ :href => "/pages" } all pages
+        .span-4
+          &nbsp;
+        .span-4.last#tweet_button
+          = '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="kuznetsovsg">Tweet</a>'
 
 @@ show
 - title @page.name
-#edit
-  %a{:href => "/#{@page}/edit"} Edit this page
+-##edit
+-#  %a{:href => "/#{@page}/edit"} Edit this page
 %h1= title
 #content
   ~"#{@page.to_html}"

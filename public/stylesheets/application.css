@@ -1,0 +1,105 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+html, body, #wrap { height: 100%; }
+body > #wrap {
+  height: auto;
+  min-height: 100%;
+}
+#main { padding-bottom: 150px; }
+#footer {
+  position: relative;
+  margin-top: -150px;
+  height: 150px;
+  clear: both;
+}
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+.clearfix { display: inline-block; }
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+.container {
+  font-family: "Georgia", serif;
+  font-size: 16px;
+}
+.page { text-shadow: 0 -1px 1px #ffffff; }
+.page h1 {
+  padding: 30px;
+  padding-bottom: 0;
+}
+.page h2 {
+  padding: 30px;
+  padding-bottom: 0;
+}
+.page h3 {
+  padding: 30px;
+  padding-bottom: 0;
+}
+.page h4 {
+  padding: 30px;
+  padding-bottom: 0;
+}
+.page #content h1 { padding: 0; }
+.page #content h2 { padding: 0; }
+.page #content h3 { padding: 0; }
+.page #content h4 { padding: 0; }
+.page pre {
+  background-color: #272727;
+  color: #f3f3f3;
+  text-shadow: 0 -1px 1px #272727;
+  padding: 15px;
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  -webkit-box-shadow: 0 0 5px rgba(127, 127, 127, 0.8);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+}
+.page div { padding: 30px; }
+.page blockquote {
+  border-left: 8px solid #cccccc;
+  padding-left: 8px;
+  color: #888888;
+}
+::-moz-selection, selection {
+  background: #ff5e99;
+  color: #ffffff;
+  text-shadow: none;
+}
+h1, h2, h3, h4 {
+  color: #272727;
+  font-weight: normal;
+  font-family: 'Droid Serif', 'Georgia', serif;
+  text-shadow: none;
+}
+h1 { font-size: 26px; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+h4 { font-size: 14px; }
+#topmenu {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+#topmenu div.container { border-bottom: 2px solid #ffffff; }
+#topmenu .span-4 { text-align: center; }
+#topmenu .span-6 { text-align: center; }
+#topmenu #tweet_button {
+  text-align: right;
+  padding-top: 5px;
+}
+#footer {
+  text-align: center;
+  font-size: 12px;
+  padding-top: 0;
+  height: 20px;
+  margin-top: -40px;
+}
+#main { padding-bottom: 40px; }
