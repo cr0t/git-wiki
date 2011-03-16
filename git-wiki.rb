@@ -202,6 +202,7 @@ __END__
     = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
     = '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
     = '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
+    = '<!--[if IE]><style type="text/css">#topmenu{background-color:#fff;}</style><![endif]-->'
     = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
