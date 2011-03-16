@@ -13,4 +13,8 @@ namespace :deploy do
   task :start do ; end
   task :stop do ; end
   task :restart, :roles => :app, :except => { :no_release => true } do ; end
+  
+  after "deploy:update" do
+    deploy::cleanup
+  end
 end
