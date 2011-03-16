@@ -87,7 +87,7 @@ module GitWiki
     end
 
     def name
-      @blob.name.gsub(/#{File.extname(@blob.name)}$/, '')
+      @blob.data.to_s.split("\n")[0]
     end
 
     def content
@@ -114,13 +114,6 @@ module GitWiki
 
       def commit_message
         new? ? "Created #{name}" : "Updated #{name}"
-      end
-
-      def wiki_link(str)
-        str.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) { |page|
-          %Q{<a class="#{self.class.css_class_for(page)}"} +
-            %Q{href="/#{page}">#{page}</a>}
-        }
       end
   end
 
@@ -175,7 +168,7 @@ module GitWiki
 
     def authorized?
       @auth ||= Rack::Auth::Basic::Request.new(request.env)
-      @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [ CONFIG['username'], CONFIG['password'] ]
+      @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [ CONFIG["username"], CONFIG["password"] ]
     end
 
     private
@@ -206,13 +199,14 @@ __END__
     = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
+    = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
   %body
     #wrap
       #main.container.page
         = yield
     #footer.container
       .span-24.last
-        = 'Code based on <a href="https://github.com/sr/git-wiki" target="_blank">git-wiki</a> project.'
+        = 'Code based on <a href="https://github.com/sr/git-wiki" target="_blank">git-wiki</a> project. You can get copy of code of this wiki at <a href="https://github.com/cr0t/git-wiki" target="_blank">github.com</a>.'
     #topmenu
       .container
         .span-10

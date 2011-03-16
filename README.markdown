@@ -1,3 +1,29 @@
+wiki.summercode.com
+===
+
+If you want to use this fork of git-wiki, you need to know following.
+
+First of all, it uses <code>wiki.yaml</code> configuration file placed in
+user's home directory who run this application.
+
+Here is an example of wiki.yaml:
+
+	username   : admin
+	password   : veryStrongPassword
+	ga_account : UA-*******-**
+
+Next you need to create <code>wiki</code> also in the user's home
+directory and initialize empty git repo in it:
+
+	$ cd ~
+	$ mkdir wiki
+	$ cd wiki
+	$ git init
+
+That is all! You can use Passenger or Unicorn to run this application.
+
+Text below is the original README from git-wiki project.
+
 git-wiki: because who needs cool names when you use git?
 ========================================================
 
