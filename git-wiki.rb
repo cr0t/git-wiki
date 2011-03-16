@@ -149,6 +149,8 @@ module GitWiki
     end
 
     get "/:page/edit" do
+      # why browser want to "GET /favicon.ico/edit" ?
+      protected! if params[:page] != "favicon.ico"
       @page = Page.find_or_create(params[:page])
       haml :edit
     end
@@ -163,9 +165,21 @@ module GitWiki
       @page.update_content(params[:body])
       redirect "/#{@page}"
     end
+    
+    def protected!
+      unless authorized?
+        response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+        throw(:halt, [401, "Not authorized\n"])
+      end
+    end
+
+    def authorized?
+      @auth ||= Rack::Auth::Basic::Request.new(request.env)
+      @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [ CONFIG['username'], CONFIG['password'] ]
+    end
 
     private
-      def title(title=nil)
+      def title(title = nil)
         @title = title.to_s unless title.nil?
         @title
       end
@@ -183,6 +197,8 @@ __END__
   %head
     %title= title
     %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    = '<link rel="icon" href="/favicon.ico" type="image/x-icon"/>'
+    = '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>'
     = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
     = '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
     = '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
@@ -209,11 +225,11 @@ __END__
 
 @@ show
 - title @page.name
--##edit
--#  %a{:href => "/#{@page}/edit"} Edit this page
 %h1= title
 #content
   ~"#{@page.to_html}"
+  #edit
+    %a{:href => "/#{@page}/edit", :rel => "nofollow"} Edit this page
 
 @@ edit
 - title "Editing #{@page.name}"

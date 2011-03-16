@@ -28,27 +28,10 @@ body > #wrap {
   font-family: "Georgia", serif;
   font-size: 16px;
 }
-.page { text-shadow: 0 -1px 1px #ffffff; }
-.page h1 {
-  padding: 30px;
-  padding-bottom: 0;
+.page {
+  text-shadow: 0 -1px 1px #ffffff;
+  padding-top: 40px;
 }
-.page h2 {
-  padding: 30px;
-  padding-bottom: 0;
-}
-.page h3 {
-  padding: 30px;
-  padding-bottom: 0;
-}
-.page h4 {
-  padding: 30px;
-  padding-bottom: 0;
-}
-.page #content h1 { padding: 0; }
-.page #content h2 { padding: 0; }
-.page #content h3 { padding: 0; }
-.page #content h4 { padding: 0; }
 .page pre {
   background-color: #272727;
   color: #f3f3f3;
@@ -61,11 +44,14 @@ body > #wrap {
   -webkit-border-radius: 2px;
   border-radius: 2px;
 }
-.page div { padding: 30px; }
 .page blockquote {
   border-left: 8px solid #cccccc;
   padding-left: 8px;
   color: #888888;
+}
+.page #edit {
+  padding: 0;
+  text-align: right;
 }
 ::-moz-selection, selection {
   background: #ff5e99;
