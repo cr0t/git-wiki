@@ -75,7 +75,7 @@ module GitWiki
     end
 
     def to_html
-      RDiscount.new(wiki_link(content)).to_html
+      RDiscount.new(content).to_html
     end
 
     def to_s
