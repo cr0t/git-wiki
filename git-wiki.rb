@@ -87,7 +87,11 @@ module GitWiki
     end
 
     def name
-      @blob.data.to_s.split("\n")[0]
+      @blob.name.gsub(/#{File.extname(@blob.name)}$/, '')
+    end
+    
+    def title
+      @blob.to_s.split("\n")[0]
     end
 
     def content
@@ -219,14 +223,14 @@ __END__
           = '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="kuznetsovsg">Tweet</a>'
 
 @@ show
-- title @page.name
+- title @page.title
 #content
   ~"#{@page.to_html}"
   #edit
     %a{:href => "/#{@page}/edit", :rel => "nofollow"} Edit this page
 
 @@ edit
-- title "Editing #{@page.name}"
+- title "Editing #{@page.title}"
 %h1= title
 %form{:method => 'POST', :action => "/#{@page}"}
   %p
