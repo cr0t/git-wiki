@@ -225,7 +225,6 @@ __END__
 
 @@ show
 - title @page.name
-%h1= title
 #content
   ~"#{@page.to_html}"
   #edit
