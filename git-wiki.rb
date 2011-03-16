@@ -91,7 +91,7 @@ module GitWiki
     end
     
     def title
-      @blob.to_s.split("\n")[0]
+      content.to_s.split("\n")[0]
     end
 
     def content
