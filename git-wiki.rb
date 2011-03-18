@@ -203,7 +203,7 @@ __END__
     = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
-    = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
+    = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(['_setDomainName','wiki.summercode.com']);_gaq.push(["_setAccount","' + CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
   %body
     #wrap
       #main.container.page
