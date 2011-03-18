@@ -12,7 +12,7 @@ set :keep_releases, 3
 namespace :deploy do
   task :start do ; end
   task :stop do ; end
-  task :restart, :roles => :app, :except => { :no_release => true } do
+  task :restart do
     run "/etc/unicorns/wiki restart"
   end
   
