@@ -186,7 +186,7 @@ module GitWiki
       end
 
       def list_item(page)
-        %Q{<a class="page_name" href="/#{page}">#{page.name}</a>}
+        %Q{<a class="page_name" href="/#{page}">#{page.title}</a>}
       end
   end
 end
