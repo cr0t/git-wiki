@@ -126,7 +126,11 @@ module GitWiki
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
     enable :inline_templates
-
+    
+    not_found do
+      haml :not_found
+    end
+    
     error PageNotFound do
       page = request.env["sinatra.error"].name
       redirect "/#{page}/edit"
@@ -166,7 +170,7 @@ module GitWiki
     def protected!
       unless authorized?
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
-        throw(:halt, [401, 'Not authorized. Please, go to <a href="/Home">Home page</a> and surf the new wiki site.' + "\n"])
+        throw(:halt, [ 401, haml(:not_authorized) ])
       end
     end
 
@@ -249,3 +253,13 @@ __END__
   %ul#list
     - @pages.each do |page|
       %li= list_item(page)
+
+@@ not_found
+- title "Not Found"
+%h1 Not Found
+%p This site has been changed. Please, go to <a href="/Home">Home page</a> and surf the new wiki site.
+
+@@ not_authorized
+- title "Not authorized"
+%h1 Not Authorized
+%p Not authorized. Please, go to <a href="/Home">Home page</a> and surf the new wiki site.
