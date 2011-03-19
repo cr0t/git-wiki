@@ -166,7 +166,7 @@ module GitWiki
     def protected!
       unless authorized?
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
-        throw(:halt, [401, "Not authorized\n"])
+        throw(:halt, [401, 'Not authorized. Please, go to <a href="/Home">Home page</a> and surf the new wiki site.' + "\n"])
       end
     end
 
