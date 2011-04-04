@@ -80,6 +80,10 @@ h4 { font-size: 14px; }
 #topmenu div.container { border-bottom: 2px solid #ffffff; }
 #topmenu .span-4 { text-align: center; }
 #topmenu .span-6 { text-align: center; }
+#topmenu #like_button {
+  text-align: right;
+  padding-top: 5px;
+}
 #topmenu #tweet_button {
   text-align: right;
   padding-top: 5px;

@@ -221,8 +221,8 @@ __END__
           %a{ :href => "/#{GitWiki.homepage}" } wiki.summercode.com
         .span-6
           %a{ :href => "/pages" } all pages
-        .span-4
-          &nbsp;
+        .span-4#like_button
+          = '<iframe src="http://www.facebook.com/plugins/like.php?href=' + request.url.to_s + '&amp;layout=button_count&amp;show_faces=true&amp;width=140&amp;action=recommend&amp;font&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" style="border:none;overflow:hidden;width:140px;height:21px;" allowTransparency="true"></iframe>'
         .span-4.last#tweet_button
           = '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="kuznetsovsg">Tweet</a>'
 
