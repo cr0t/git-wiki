@@ -227,7 +227,7 @@ __END__
         .span-3#tweet_button
           = '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="kuznetsovsg">Tweet</a>'
         .span-2.last#evernote_button
-          = '<a href="#" onclick="Evernote.doClip({contentId:\'content\'});return false;"><img src="http://static.evernote.com/article-clipper.png" alt="Clip in Evernote" style="vertical-align:bottom"></a>'
+          = '<a href="#" onclick="Evernote.doClip({styling:'none',contentId:\'content\'});return false;"><img src="http://static.evernote.com/article-clipper.png" alt="Clip in Evernote" style="vertical-align:bottom"></a>'
 
 @@ show
 - title @page.title
