@@ -207,6 +207,7 @@ __END__
     = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
+    = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>'
     = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
   %body
     #wrap
@@ -219,12 +220,14 @@ __END__
       .container
         .span-10
           %a{ :href => "/#{GitWiki.homepage}" } wiki.summercode.com
-        .span-6
+        .span-5
           %a{ :href => "/pages" } all pages
         .span-4#like_button
           = '<iframe src="http://www.facebook.com/plugins/like.php?href=' + request.url.to_s + '&amp;layout=button_count&amp;show_faces=true&amp;width=140&amp;action=recommend&amp;font&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" style="border:none;overflow:hidden;width:140px;height:21px;" allowTransparency="true"></iframe>'
-        .span-4.last#tweet_button
+        .span-3#tweet_button
           = '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="kuznetsovsg">Tweet</a>'
+        .span-2.last#evernote_button
+          = '<a href="#" onclick="Evernote.doClip({contentId:\'content\'});return false;"><img src="http://static.evernote.com/article-clipper.png" alt="Clip in Evernote" style="vertical-align:bottom"></a>'
 
 @@ show
 - title @page.title
