@@ -1,3 +1,5 @@
+$KCODE = "UTF-8"
+
 require "sinatra/base"
 require "haml"
 require "grit"
@@ -27,19 +29,30 @@ module GitWiki
   class Page
     def self.find_all
       return [] if repository.tree.contents.empty?
-      repository.tree.contents.collect { |blob| new(blob) }
+      collect_blobs(repository.tree)
+    end
+    
+    def self.collect_blobs(tree)
+      blobs = tree.contents.collect do |blob_or_tree|
+        if blob_or_tree.class == Grit::Blob
+          new(blob_or_tree)
+        else
+          blobs = { blob_or_tree.name.to_sym => collect_blobs(blob_or_tree) }
+        end
+      end
+      blobs.compact
     end
 
     def self.find(name)
       page_blob = find_blob(name)
       raise PageNotFound.new(name) unless page_blob
-      new(page_blob)
+      new(page_blob, name)
     end
 
     def self.find_or_create(name)
       find(name)
     rescue PageNotFound
-      new(create_blob_for(name))
+      new(create_blob_for(name), name)
     end
 
     def self.css_class_for(name)
@@ -58,7 +71,7 @@ module GitWiki
     end
 
     def self.find_blob(page_name)
-      repository.tree/(page_name + extension)
+      repository.tree / (page_name + extension)
     end
     private_class_method :find_blob
 
@@ -70,8 +83,9 @@ module GitWiki
     end
     private_class_method :create_blob_for
 
-    def initialize(blob)
+    def initialize(blob, path_on_site = "")
       @blob = blob
+      @site_path = path_on_site
     end
 
     def to_html
@@ -95,29 +109,55 @@ module GitWiki
     end
 
     def content
-      @blob.data
+      if @blob.class == Grit::Blob
+        @blob.data
+      else
+        @blob.name
+      end
     end
 
-    def update_content(new_content)
+    def update_content(new_content, editor_name)
       return if new_content == content
+      create_new_dirs_structure(file_name) # create a new directories if they don't exist yet
       File.open(file_name, "w") { |f| f << new_content }
-      add_to_index_and_commit!
+      add_to_index_and_commit!(editor_name)
     end
 
     private
-      def add_to_index_and_commit!
+      def add_to_index_and_commit!(editor_name)
         Dir.chdir(self.class.repository.working_dir) {
-          self.class.repository.add(@blob.name)
+          p file_name
+          self.class.repository.add(file_name)
+          self.class.repository.commit_index(commit_message(editor_name))
         }
-        self.class.repository.commit_index(commit_message)
       end
 
       def file_name
-        File.join(self.class.repository.working_dir, name + self.class.extension)
+        unless @site_path.empty?
+          File.join(self.class.repository.working_dir, @site_path + self.class.extension)
+        else
+          File.join(self.class.repository.working_dir, name + self.class.extension)
+        end
       end
 
-      def commit_message
-        new? ? "Created #{name}" : "Updated #{name}"
+      def commit_message(editor_name)
+        new? ? "#{editor_name} created '#{file_name}'" : "#{editor_name} updated '#{file_name}'"
+      end
+      
+      # prepare and creates new directory structure for the files
+      def create_new_dirs_structure(file_name)
+        dir_path_pieces = file_name.gsub(self.class.repository.working_dir, "").split("/").compact
+        dir_path_pieces.pop(1) # remove filename.markdown
+        
+        dir_path_pieces.reduce("") do |memo,dir_piece|
+          directory_path = self.class.repository.working_dir + "/" + memo + "/" + dir_piece
+          
+          unless File.exist?(directory_path)
+            Dir.mkdir(directory_path)
+          end
+          
+          memo + "/" + dir_piece
+        end
       end
   end
 
@@ -126,13 +166,14 @@ module GitWiki
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
     enable :inline_templates
+    enable :sessions
     
     not_found do
       haml :not_found
     end
     
     error PageNotFound do
-      page = request.env["sinatra.error"].name
+      page = request.env["sinatra.error"].name.gsub /\/$/, ""
       redirect "/#{page}/edit"
     end
 
@@ -149,28 +190,31 @@ module GitWiki
       haml :list
     end
 
-    get "/:page/edit" do
+    get "/*/edit" do
       # why browser want to "GET /favicon.ico/edit" ?
-      protected! if params[:page] != "favicon.ico"
-      @page = Page.find_or_create(params[:page])
+      protected! if params[:splat][0] != "/favicon.ico"
+      @page = Page.find_or_create(params[:splat][0])
       haml :edit
     end
 
-    get "/:page" do
-      @page = Page.find(params[:page])
+    get "/*" do
+      @page = Page.find(params[:splat][0])
       haml :show
     end
 
-    post "/:page" do
-      @page = Page.find_or_create(params[:page])
-      @page.update_content(params[:body])
-      redirect "/#{@page}"
+    post "/*" do
+      @page = Page.find_or_create(params[:splat][0])
+      @page.update_content(params[:body], session[:editor_name]) # send an editor_name
+      
+      redirect "/#{@page_name}"
     end
     
     def protected!
       unless authorized?
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
         throw(:halt, [ 401, haml(:not_authorized) ])
+      else
+        session[:editor_name] = @auth.credentials.first # saves editor name in the session variable
       end
     end
 
@@ -185,8 +229,23 @@ module GitWiki
         @title
       end
 
-      def list_item(page)
-        %Q{<a class="page_name" href="/#{page}">#{page.title}</a>}
+      def list_item(page, directory = "")
+        ret = ""
+        
+        if page.class == GitWiki::Page
+          ret += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>}
+        elsif page.class == Hash
+          page.each_pair { |key,value|
+            directory += key.to_s + "/"
+            ret += "<li>" + key.to_s + "<ul>" + list_item(value, directory) + "</ul>" + "</li>"
+          }
+        elsif page.class == Array
+          page.each { |value|
+            ret += list_item(value, directory)
+          }
+        end
+        
+        ret
       end
   end
 end
@@ -234,18 +293,18 @@ __END__
 #content
   ~"#{@page.to_html}"
   #edit
-    %a{:href => "/#{@page}/edit", :rel => "nofollow"} Edit this page
+    %a{:href => "/#{@page_name}/edit", :rel => "nofollow"} Edit this page
 
 @@ edit
 - title "Editing #{@page.title}"
 %h1= title
-%form{:method => 'POST', :action => "/#{@page}"}
+%form{:method => 'POST', :action => "/#{@page_name}"}
   %p
     %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
   %p
     %input.submit{:type => :submit, :value => "Save as the newest version"}
     or
-    %a.cancel{:href=>"/#{@page}"} cancel
+    %a.cancel{:href=>"/#{@page_name}"} cancel
 
 @@ list
 - title "Listing pages"
@@ -255,7 +314,7 @@ __END__
 - else
   %ul#list
     - @pages.each do |page|
-      %li= list_item(page)
+      = list_item(page)
 
 @@ not_found
 - title "Not Found"
