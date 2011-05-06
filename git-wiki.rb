@@ -104,6 +104,10 @@ module GitWiki
       @blob.name.gsub(/#{File.extname(@blob.name)}$/, '')
     end
     
+    def site_path
+      @site_path
+    end
+    
     def title
       content.to_s.split("\n")[0]
     end
@@ -126,12 +130,11 @@ module GitWiki
     private
       def add_to_index_and_commit!(editor_name)
         Dir.chdir(self.class.repository.working_dir) {
-          p file_name
           self.class.repository.add(file_name)
           self.class.repository.commit_index(commit_message(editor_name))
         }
       end
-
+      
       def file_name
         unless @site_path.empty?
           File.join(self.class.repository.working_dir, @site_path + self.class.extension)
@@ -198,15 +201,18 @@ module GitWiki
     end
 
     get "/*" do
+      #p params
+      #p request.path_info
+      #p request.route
       @page = Page.find(params[:splat][0])
       haml :show
     end
 
     post "/*" do
       @page = Page.find_or_create(params[:splat][0])
-      @page.update_content(params[:body], session[:editor_name]) # send an editor_name
+      @page.update_content(params[:body], session[:author_name]) # send an editor_name
       
-      redirect "/#{@page_name}"
+      redirect "/#{@page.site_path}"
     end
     
     def protected!
@@ -214,13 +220,16 @@ module GitWiki
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
         throw(:halt, [ 401, haml(:not_authorized) ])
       else
-        session[:editor_name] = @auth.credentials.first # saves editor name in the session variable
+        session[:author_name] = @auth.credentials.first # save author name in the session variable
       end
     end
 
     def authorized?
       @auth ||= Rack::Auth::Basic::Request.new(request.env)
-      @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [ CONFIG["username"], CONFIG["password"] ]
+      
+      if @auth.provided? && @auth.basic? && @auth.credentials
+        $CONFIG["users"].any? { |account| @auth.credentials == [ account["username"], account["password"] ] }
+      end
     end
 
     private
@@ -267,7 +276,7 @@ __END__
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
     = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>'
-    = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
+    = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>' if $CONFIG["use_ga_tracking"]
   %body
     #wrap
       #main.container.page
@@ -278,7 +287,8 @@ __END__
     #topmenu
       .container
         .span-10
-          %a{ :href => "/#{GitWiki.homepage}" } wiki.summercode.com
+          %a{ :href => "/#{GitWiki.homepage}" }
+            = $CONFIG["logo_text"]
         .span-5
           %a{ :href => "/pages" } all pages
         .span-4#like_button
@@ -293,18 +303,24 @@ __END__
 #content
   ~"#{@page.to_html}"
   #edit
-    %a{:href => "/#{@page_name}/edit", :rel => "nofollow"} Edit this page
+    %a{:href => "/#{@page.site_path}/edit", :rel => "nofollow"} Edit this page
 
 @@ edit
 - title "Editing #{@page.title}"
+<link href="/markitup/skins/markitup/style.css" rel="stylesheet" type="text/css"/>
+<link href="/markitup/sets/markdown/style.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
+<script type="text/javascript" src="/markitup/jquery.markitup.js"></script>
+<script type="text/javascript" src="/markitup/sets/markdown/set.js"></script>
+<script type="text/javascript">$(document).ready(function()	{ $('#markdown').markItUp(mySettings); });</script>
 %h1= title
-%form{:method => 'POST', :action => "/#{@page_name}"}
+%form{:method => 'POST', :action => "/#{@page.site_path}"}
   %p
-    %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
+    %textarea{:id => "markdown", :name => "body", :rows => 30, :style => "width: 100%" }= @page.content
   %p
     %input.submit{:type => :submit, :value => "Save as the newest version"}
     or
-    %a.cancel{:href=>"/#{@page_name}"} cancel
+    %a.cancel{:href=>"/#{@page.site_path}"} cancel
 
 @@ list
 - title "Listing pages"

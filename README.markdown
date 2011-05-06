@@ -8,9 +8,15 @@ user's home directory who run this application.
 
 Here is an example of wiki.yaml:
 
-	username   : admin
-	password   : veryStrongPassword
-	ga_account : UA-*******-**
+	use_ga_tracking : true
+	ga_account      : UA-*******-**
+	show_contents   : true
+	show_tree       : true
+	users:
+		- username : admin
+			password : uoWeix3c
+		- username : moderator
+			password : xooQu1xe
 
 Next you need to create <code>wiki</code> also in the user's home
 directory and initialize empty git repo in it:
@@ -21,6 +27,11 @@ directory and initialize empty git repo in it:
 	$ git init
 
 That is all! You can use Passenger or Unicorn to run this application.
+
+To develop this fork, use shotgun gem:
+
+	$ sudo gem install shotgun
+	$ shotgun config.ru -p 9393
 
 Text below is the original README from git-wiki project.
 
