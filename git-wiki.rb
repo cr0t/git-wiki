@@ -1,5 +1,3 @@
-$KCODE = "UTF-8"
-
 require "sinatra/base"
 require "haml"
 require "grit"
