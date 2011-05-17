@@ -1,25 +1,29 @@
-wiki.summercode.com
+git-wiki improved
 ===
 
 If you want to use this fork of git-wiki, you need to know following.
 
 First of all, it uses <code>wiki.yaml</code> configuration file placed in
-user's home directory who run this application.
+user's home directory who will run this application.
 
 Here is an example of wiki.yaml:
 
-	use_ga_tracking : true
+	use_ga_tracking : false
 	ga_account      : UA-*******-**
 	show_contents   : true
 	show_tree       : true
+	show_fb         : false
+	show_tweet      : false
+	show_evernote   : true
+	logo_text       : just-a-wiki
 	users:
-		- username : admin
-			password : uoWeix3c
-		- username : moderator
-			password : xooQu1xe
+	  - username : admin
+	    password : uoWeix3c
+	  - username : moderator
+	    password : xooQu1xe
 
-Next you need to create <code>wiki</code> also in the user's home
-directory and initialize empty git repo in it:
+Next you need to create <code>wiki</code> also in the user's home directory
+and initialize empty git repo in it:
 
 	$ cd ~
 	$ mkdir wiki
@@ -28,10 +32,10 @@ directory and initialize empty git repo in it:
 
 That is all! You can use Passenger or Unicorn to run this application.
 
-To develop this fork, use shotgun gem:
+To develop this fork, use <code>shotgun</code> gem:
 
 	$ sudo gem install shotgun
-	$ shotgun config.ru -p 9393
+	$ shotgun config.ru
 
 Text below is the original README from git-wiki project.
 

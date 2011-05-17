@@ -4,19 +4,34 @@ $(document).ready(function()	{
 	var pathname = window.location.pathname;
 	var current_sitepath = pathname.substring(0, pathname.indexOf("edit") - 1);
 	
+	// used to check that we remove unnecessary image elements from list only once for one image
+	var removed_items = [];
+	
 	var uploader = new qq.FileUploader({
 		element           : document.getElementById("file-uploader"),
 		action            : "/upload",
 		allowedExtensions : [ "png", "jpg", "jpeg", "gif" ],
 		params            : { sitepath : current_sitepath },
-		debug             : true,
+		debug             : false,
 		onComplete        : function(id, file_name, response_json) {
 			if (response_json.success == true) {
-				LOCAL_IMAGES.push("file_name");
+				removed_items = [];
+				$(".qq-upload-success").each(function (i, el) {
+					// we check for the file_name already exists in our list and we need
+					// to delete it only once, so we need to check removed_items array
+					if (
+						$(el).children("span").html() === file_name
+						&& removed_items.indexOf(file_name) === -1
+					) {
+						removed_items.push(file_name);
+						$(el).remove();
+					}
+				});
 			}
 		}
 	});
 	
+	// fill images list when page loaded (LOCAL_IMAGES filled in view file)
 	if (LOCAL_IMAGES.length > 0) {
 		for (i = 0; i < LOCAL_IMAGES.length; i++) {
 			var element = '<li class="qq-upload-success"><span class="qq-upload-file">' + LOCAL_IMAGES[i] + '</span></li>';
