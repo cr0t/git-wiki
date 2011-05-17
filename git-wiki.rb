@@ -49,10 +49,10 @@ module GitWiki
       new(page_blob, name)
     end
 
-    def self.find_or_create(name)
+    def self.find_or_create(name, image = false)
       find(name)
     rescue PageNotFound
-      new(create_blob_for(name), name)
+      new(create_blob_for(name, image), name)
     end
 
     def self.css_class_for(name)
@@ -69,15 +69,27 @@ module GitWiki
     def self.extension
       GitWiki.extension || raise
     end
+    
+    def self.image_extensions
+      /(png|jpg|jpeg|gif)$/
+    end
 
     def self.find_blob(page_name)
-      repository.tree / (page_name + extension)
+      found_ext   = extension
+      ext_matches = page_name.match(Page.image_extensions)
+      found_ext   = "" if !ext_matches.nil?
+      repository.tree / (page_name + found_ext)
     end
     private_class_method :find_blob
 
-    def self.create_blob_for(page_name)
+    def self.create_blob_for(page_name, image = false)
+      blob_name = page_name + extension
+      blob_name = page_name if image
+      
+      p blob_name
+      
       Grit::Blob.create(repository, {
-        :name => page_name + extension,
+        :name => blob_name,
         :data => ""
       })
     end
@@ -86,6 +98,11 @@ module GitWiki
     def initialize(blob, path_on_site = "")
       @blob = blob
       @site_path = path_on_site
+      if path_on_site.match(Page.image_extensions).nil?
+        @image = false
+      else
+        @image = true
+      end
     end
 
     def to_html
@@ -138,6 +155,19 @@ module GitWiki
         } if commit_hash["files"].first.first == site_path + GitWiki.extension
       }.compact
     end
+    
+    def mime_type
+      @blob.mime_type
+    end
+    
+    def list_images
+      path = Page.repository.working_dir + "/" + @site_path
+      if File.exists?(path)
+        Dir.open(path).entries.map { |e| e if (!e.match(Page.image_extensions).nil? && File.file?(path + "/" + e)) }.compact
+      else
+        []
+      end
+    end
 
     private
       def add_to_index_and_commit!(editor_name)
@@ -148,10 +178,13 @@ module GitWiki
       end
       
       def file_name
+        extension = self.class.extension
+        extension = "" if @image
+        
         unless @site_path.empty?
-          File.join(self.class.repository.working_dir, @site_path + self.class.extension)
+          File.join(self.class.repository.working_dir, @site_path + extension)
         else
-          File.join(self.class.repository.working_dir, name + self.class.extension)
+          File.join(self.class.repository.working_dir, name + extension)
         end
       end
 
@@ -199,14 +232,6 @@ module GitWiki
     get "/" do
       redirect "/" + GitWiki.homepage
     end
-    
-    post "/preview" do
-      css  = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
-      css += '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
-      css += '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
-      css += '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
-      css + '<div class="page container">' + RDiscount.new(params[:data]).to_html + '</div>'
-    end
 
     get "/pages" do
       @pages = Page.find_all
@@ -217,6 +242,7 @@ module GitWiki
       # why browser want to "GET /favicon.ico/edit" ?
       protected! if params[:splat][0] != "/favicon.ico"
       @page = Page.find_or_create(params[:splat][0])
+      @page.list_images
       haml :edit
     end
     
@@ -227,7 +253,36 @@ module GitWiki
 
     get "/*" do
       @page = Page.find(params[:splat][0])
-      haml :show
+      matched_ext = params[:splat][0].match(Page.image_extensions)
+      if !matched_ext.nil?
+        content_type "image/" + matched_ext[0]
+        @page.content
+      else
+        haml :show
+      end
+    end
+    
+    post "/preview" do
+      css  = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
+      css += '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
+      css += '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
+      css += '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
+      css + '<div class="page container">' + RDiscount.new(params[:data]).to_html + '</div>'
+    end
+    
+    post "/upload" do
+      content_type "application/json"
+      
+      begin
+        protected!
+        name     = params[:qqfile]
+        sitepath = params[:sitepath]
+        page     = Page.find_or_create(sitepath + "/" + name, image = true)
+        page.update_content(request.body.read, @auth.credentials.first)
+        "{success:true}"
+      rescue
+        "{success:false}"
+      end
     end
 
     post "/*" do
@@ -264,11 +319,11 @@ module GitWiki
         ret = ""
         
         if page.class == GitWiki::Page
-          ret += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>}
+          ret += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>} if page.mime_type == "text/plain"
         elsif page.class == Hash
           page.each_pair { |key,value|
             directory += key.to_s + "/"
-            ret += "<li>" + key.to_s + "<ul>" + list_item(value, directory) + "</ul>" + "</li>"
+            ret += '<li><a class="page_name" href="/' + directory.to_s + '">' + key.to_s + "</a><ul>" + list_item(value, directory) + "</ul>" + "</li>"
           }
         elsif page.class == Array
           page.each { |value|
@@ -345,9 +400,21 @@ __END__
 <link href="/markitup/sets/markdown/style.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
 <script type="text/javascript" src="/markitup/jquery.markitup.js"></script>
-<script type="text/javascript" src="/markitup/sets/markdown/set.js"></script>
-<script type="text/javascript">$(document).ready(function()	{ $('#markdown').markItUp(mySettings); });</script>
+<script type="text/javascript" src="/javascripts/fileuploader.js"></script>
+<script type="text/javascript" src="/javascripts/edit.js"></script>
+<script type="text/javascript">
+#{"/*<![CDATA[*/"}
+var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
+#{"/*]]>*/"}
+</script>
+#file-uploader
+  %noscript
+    %p Please enable JavaScript to use advanced file uploader.
+    %form{ :action=>"/upload", :method=>"post", :enctype=>"multipart/form-data" }
+      %input{ :type=>"file", :name=>"upfile" }
+      %input{ :type=>"submit", :value=>"Upload" }
 %h1= title
+<br clear="all"/>
 %form{:method => 'POST', :action => "/#{@page.site_path}"}
   %p
     %textarea{:id => "markdown", :name => "body", :rows => 30}= @page.content
