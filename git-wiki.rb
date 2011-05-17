@@ -126,6 +126,18 @@ module GitWiki
       File.open(file_name, "w") { |f| f << new_content }
       add_to_index_and_commit!(editor_name)
     end
+    
+    def revisions
+      Page.repository.commits_since.map { |commit|
+        commit_hash = commit.stats.to_hash
+        {
+          :date      => commit.date,
+          :message   => commit.message.gsub(/'.+'/, ""),
+          :additions => commit_hash["additions"],
+          :deletions => commit_hash["files"].first[3]
+        } if commit_hash["files"].first.first == site_path + GitWiki.extension
+      }.compact
+    end
 
     private
       def add_to_index_and_commit!(editor_name)
@@ -144,7 +156,7 @@ module GitWiki
       end
 
       def commit_message(editor_name)
-        new? ? "#{editor_name} created '#{file_name}'" : "#{editor_name} updated '#{file_name}'"
+        new? ? "created '#{file_name}' by #{editor_name}" : "updated '#{file_name}' by #{editor_name}"
       end
       
       # prepare and creates new directory structure for the files
@@ -187,6 +199,14 @@ module GitWiki
     get "/" do
       redirect "/" + GitWiki.homepage
     end
+    
+    post "/preview" do
+      css  = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
+      css += '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
+      css += '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
+      css += '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
+      css + '<div class="page container">' + RDiscount.new(params[:data]).to_html + '</div>'
+    end
 
     get "/pages" do
       @pages = Page.find_all
@@ -199,18 +219,22 @@ module GitWiki
       @page = Page.find_or_create(params[:splat][0])
       haml :edit
     end
+    
+    get "/*/history" do
+      @page = Page.find(params[:splat][0])
+      haml :history
+    end
 
     get "/*" do
-      #p params
-      #p request.path_info
-      #p request.route
       @page = Page.find(params[:splat][0])
       haml :show
     end
 
     post "/*" do
+      protected! if params[:splat][0] != "/favicon.ico"
+      
       @page = Page.find_or_create(params[:splat][0])
-      @page.update_content(params[:body], session[:author_name]) # send an editor_name
+      @page.update_content(params[:body], @auth.credentials.first)
       
       redirect "/#{@page.site_path}"
     end
@@ -219,8 +243,6 @@ module GitWiki
       unless authorized?
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
         throw(:halt, [ 401, haml(:not_authorized) ])
-      else
-        session[:author_name] = @auth.credentials.first # save author name in the session variable
       end
     end
 
@@ -303,7 +325,19 @@ __END__
 #content
   ~"#{@page.to_html}"
   #edit
+    %a{:href => "/#{@page.site_path}/history", :rel => "nofollow"} History
+    |
     %a{:href => "/#{@page.site_path}/edit", :rel => "nofollow"} Edit this page
+
+@@ history
+- title @page.title
+#content
+  %h2 Revisions history of <strong>#{@page.title}</strong> page
+  - @page.revisions.each do |rev|
+    .span-24.last
+      .span-7 #{rev[:date]}
+      .span-11 #{rev[:message]}
+      .span-6.last <small>#{rev[:additions]} strings added, #{rev[:deletions]} strings deleted</small>
 
 @@ edit
 - title "Editing #{@page.title}"
@@ -316,7 +350,7 @@ __END__
 %h1= title
 %form{:method => 'POST', :action => "/#{@page.site_path}"}
   %p
-    %textarea{:id => "markdown", :name => "body", :rows => 30, :style => "width: 100%" }= @page.content
+    %textarea{:id => "markdown", :name => "body", :rows => 30}= @page.content
   %p
     %input.submit{:type => :submit, :value => "Save as the newest version"}
     or
