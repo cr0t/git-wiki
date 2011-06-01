@@ -31,6 +31,12 @@ module GitWiki
       collect_blobs(repository.tree)
     end
     
+    def self.find_all_in(path)
+      repository_tree = repository.tree / path
+      return [] if repository_tree.contents.empty?
+      collect_blobs(repository_tree)
+    end
+    
     def self.collect_blobs(tree, depth = 65535)
       begin
         blobs = tree.contents.collect do |blob_or_tree|
@@ -178,12 +184,7 @@ module GitWiki
     
     def list_contents
       begin
-        parent_pos = @site_path.index("/")
-        if parent_pos.nil?
-          Page.collect_blobs(Page.repository.tree, depth = 0)
-        else
-          Page.collect_blobs(Page.repository.tree / @site_path.slice(0, parent_pos), depth = 1)
-        end
+        Page.find_all_in(@site_path)
       rescue
         []
       end
@@ -360,8 +361,13 @@ module GitWiki
         ret = ""
         
         page.list_contents.each do |value|
-          url = @page.site_path.gsub(/#{@page}/, "") + value.to_s
-          ret += %Q{<a class="page_name" href="/#{url}">#{value}</a><br/>}
+          title = value
+          title = value.title if value.class == GitWiki::Page
+          if value.class == Hash
+            title = value.first[0].title
+          end
+          url = @page.site_path + "/" + value.to_s
+          ret += %Q{<a class="page_name" href="/#{url}">#{title}</a><br/>}
         end
         
         ret = "<small><em>No pages in this directory</em></small>" if ret == ""
