@@ -97,6 +97,7 @@ h4 { font-size: 14px; }
   margin-top: -40px;
 }
 #main { padding-bottom: 40px; }
+#main img { max-width: 950px; }
 #file-uploader {
   float: right;
   text-shadow: none;

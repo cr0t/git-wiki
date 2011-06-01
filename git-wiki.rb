@@ -2,6 +2,7 @@ require "sinatra/base"
 require "haml"
 require "grit"
 require "rdiscount"
+require "pp"
 
 module GitWiki
   class << self
@@ -30,15 +31,24 @@ module GitWiki
       collect_blobs(repository.tree)
     end
     
-    def self.collect_blobs(tree)
-      blobs = tree.contents.collect do |blob_or_tree|
-        if blob_or_tree.class == Grit::Blob
-          new(blob_or_tree)
-        else
-          blobs = { blob_or_tree.name.to_sym => collect_blobs(blob_or_tree) }
+    def self.collect_blobs(tree, depth = 65535)
+      begin
+        blobs = tree.contents.collect do |blob_or_tree|
+          if blob_or_tree.class == Grit::Blob
+            # here we need to check if we have a directory with the name like pagename
+            # but without '.markdown' extension and then we need to collect blobs in it
+            name = blob_or_tree.name.gsub(/#{File.extname(blob_or_tree.name)}$/, '')
+            if !(tree / name).nil? && depth > 0
+              { new(blob_or_tree) => collect_blobs(tree / name, depth - 1) }
+            elsif !blob_or_tree.name.match(/\.markdown$/).nil?
+              new(blob_or_tree)
+            end
+          end
         end
+        blobs.compact
+      rescue
+        []
       end
-      blobs.compact
     end
 
     def self.find(name)
@@ -84,8 +94,6 @@ module GitWiki
       blob_name = page_name + extension
       blob_name = page_name if image
       
-      p blob_name
-      
       Grit::Blob.create(repository, {
         :name => blob_name,
         :data => ""
@@ -124,7 +132,8 @@ module GitWiki
     end
     
     def title
-      content.to_s.split("\n")[0]
+      content.to_s.split("\n")[0].strip
+    rescue
     end
 
     def content
@@ -163,6 +172,19 @@ module GitWiki
       if File.exists?(path)
         Dir.open(path).entries.map { |e| e if (!e.match(Page.image_extensions).nil? && File.file?(path + "/" + e)) }.compact
       else
+        []
+      end
+    end
+    
+    def list_contents
+      begin
+        parent_pos = @site_path.index("/")
+        if parent_pos.nil?
+          Page.collect_blobs(Page.repository.tree, depth = 0)
+        else
+          Page.collect_blobs(Page.repository.tree / @site_path.slice(0, parent_pos), depth = 1)
+        end
+      rescue
         []
       end
     end
@@ -321,13 +343,28 @@ module GitWiki
         elsif page.class == Hash
           page.each_pair { |key,value|
             directory += key.to_s + "/"
-            ret += '<li><a class="page_name" href="/' + directory.to_s + '">' + key.to_s + "</a><ul>" + list_item(value, directory) + "</ul>" + "</li>"
+            title = key.to_s
+            title = key.title if key.class == GitWiki::Page
+            ret += '<li><a class="page_name" href="/' + directory.to_s.gsub(/\/$/, "") + '">' + title + "</a><ul>" + list_item(value, directory) + "</ul>" + "</li>"
           }
         elsif page.class == Array
           page.each { |value|
             ret += list_item(value, directory)
           }
         end
+        
+        ret
+      end
+      
+      def list_contents(page)
+        ret = ""
+        
+        page.list_contents.each do |value|
+          url = @page.site_path.gsub(/#{@page}/, "") + value.to_s
+          ret += %Q{<a class="page_name" href="/#{url}">#{value}</a><br/>}
+        end
+        
+        ret = "<small><em>No pages in this directory</em></small>" if ret == ""
         
         ret
       end
@@ -349,8 +386,10 @@ __END__
     = '<!--[if IE]><style type="text/css">#topmenu{background-color:#fff;}</style><![endif]-->'
     = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
-    = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
-    = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>'
+    = '<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>'
+    = '<script type="text/javascript" src="/javascripts/application.js"></script>'
+    = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>' if $CONFIG["show_tweet"]
+    = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>' if $CONFIG["show_evernote"]
     = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>' if $CONFIG["use_ga_tracking"]
   %body
     #wrap
@@ -375,12 +414,20 @@ __END__
 
 @@ show
 - title @page.title
+#contents_container
+  #contents
+    %a{ :href => "#{@site_path}", :id => "contents_toggler", :rel => "nofollow" } Contents
+    #contents_data{ :style => "display:none" }
+      %div{ :class => "bottom" }
+        = list_contents(@page)
 #content
+  #contents_spacer
+    &nbsp;
   ~"#{@page.to_html}"
   #edit
-    %a{:href => "/#{@page.site_path}/history", :rel => "nofollow"} History
+    %a{ :href => "/#{@page.site_path}/history", :rel => "nofollow" } History
     |
-    %a{:href => "/#{@page.site_path}/edit", :rel => "nofollow"} Edit this page
+    %a{ :href => "/#{@page.site_path}/edit", :rel => "nofollow" } Edit this page
 
 @@ history
 - title @page.title
@@ -396,7 +443,6 @@ __END__
 - title "Editing #{@page.title}"
 <link href="/markitup/skins/markitup/style.css" rel="stylesheet" type="text/css"/>
 <link href="/markitup/sets/markdown/style.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
 <script type="text/javascript" src="/markitup/jquery.markitup.js"></script>
 <script type="text/javascript" src="/javascripts/fileuploader.js"></script>
 <script type="text/javascript" src="/javascripts/edit.js"></script>
