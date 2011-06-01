@@ -2,7 +2,6 @@ require "sinatra/base"
 require "haml"
 require "grit"
 require "rdiscount"
-require "pp"
 
 module GitWiki
   class << self
