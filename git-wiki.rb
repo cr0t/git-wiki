@@ -408,8 +408,10 @@ __END__
         .span-10
           %a{ :href => "/#{GitWiki.homepage}" }
             = $CONFIG["logo_text"]
-        .span-5
+        .span-3
           %a{ :href => "/pages" } all pages
+        .span-2
+          <a href="#" id="font_plus">A+</a>&nbsp;<a href="#" id="font_minus">a-</a>
         .span-4#like_button
           = '<iframe src="http://www.facebook.com/plugins/like.php?href=' + request.url.to_s + '&amp;layout=button_count&amp;show_faces=true&amp;width=140&amp;action=recommend&amp;font&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" style="border:none;overflow:hidden;width:140px;height:21px;" allowTransparency="true"></iframe>' if $CONFIG["show_fb"]
         .span-3#tweet_button
