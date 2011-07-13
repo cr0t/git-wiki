@@ -264,7 +264,6 @@ module GitWiki
       # why browser want to "GET /favicon.ico/edit" ?
       protected! if params[:splat][0] != "/favicon.ico"
       @page = Page.find_or_create(params[:splat][0])
-      @page.list_images
       haml :edit
     end
     
@@ -434,9 +433,11 @@ __END__
         .span-2.last#evernote_button
           = '<a href="#" onclick="Evernote.doClip({styling:\'none\',contentId:\'content\'});return false;"><img src="http://static.evernote.com/article-clipper.png" alt="Clip in Evernote" style="vertical-align:bottom"></a>' if $CONFIG["show_evernote"]
       .container
-        .span-24.last
+        .span-20
           #breadcrumbs
             = breadcrumbs(@page)
+        .span-4.last#create_new_page_block
+          = '<a href="#" id="create_new_page">Create new page</a>'
 
 @@ show
 - title @page.title

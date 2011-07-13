@@ -1,5 +1,6 @@
 $(document).ready(function () {
 	$("#contents a:first").css("color", "#ccc");
+	$("#contents").css("background-color", "rgba(255, 255, 255, 0.9)");
 	
 	$("#contents_toggler").click(function (e) {
 		e.preventDefault();
@@ -12,6 +13,16 @@ $(document).ready(function () {
 		}
 		else {
 			$("#contents a:first").css("color", "#06C");
+		}
+	});
+	
+	$("#create_new_page").click(function (e){
+		e.preventDefault();
+		
+		var site_path = prompt("Please, input the new page site path", window.location.pathname);
+		
+		if (site_path != null && site_path != "") {
+			window.location = window.location.origin + site_path;
 		}
 	});
 	
