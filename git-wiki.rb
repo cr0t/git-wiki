@@ -263,7 +263,12 @@ module GitWiki
     get "/*/edit" do
       # why browser want to "GET /favicon.ico/edit" ?
       protected! if params[:splat][0] != "/favicon.ico"
-      @page = Page.find_or_create(params[:splat][0])
+      begin
+        @page = Page.find_or_create(params[:splat][0])
+      rescue => ex
+        p ex
+        p ex.message
+      end
       haml :edit
     end
     
@@ -379,8 +384,11 @@ module GitWiki
         if !page.nil? && page.site_path != "Home"
           page.site_path.split("/").inject("") do |memo, part| 
             memo += part
-            page  = Page.find(memo)
-            ret  += %Q{ / <a class="page_name" href="/#{memo}">#{page.title}</a>} if page.mime_type == "text/plain"
+            begin
+              page  = Page.find(memo)
+              ret  += %Q{ / <a class="page_name" href="/#{memo}">#{page.title}</a>} if page.mime_type == "text/plain"
+            rescue
+            end
             memo + "/"
           end
         end
