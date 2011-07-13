@@ -76,8 +76,8 @@ h4 { font-size: 14px; }
   top: 0;
   width: 100%;
   background-color: rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid #ffffff;
 }
-#topmenu div.container { border-bottom: 2px solid #ffffff; }
 #topmenu .span-4 { text-align: center; }
 #topmenu .span-6 { text-align: center; }
 #topmenu #like_button {
@@ -89,6 +89,7 @@ h4 { font-size: 14px; }
   padding-top: 5px;
 }
 #topmenu #evernote_button { text-align: right; }
+#topmenu #breadcrumbs { font-size: 0.8em; }
 #footer {
   text-align: center;
   font-size: 12px;

@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	$("#contents a:first").css("color", "#ccc");
+	
 	$("#contents_toggler").click(function (e) {
 		e.preventDefault();
 		

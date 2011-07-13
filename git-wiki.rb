@@ -34,6 +34,8 @@ module GitWiki
       repository_tree = repository.tree / path
       return [] if repository_tree.contents.empty?
       collect_blobs(repository_tree)
+    rescue
+      []
     end
     
     def self.collect_blobs(tree, depth = 65535)
@@ -335,41 +337,54 @@ module GitWiki
         @title
       end
 
-      def list_item(page, directory = "")
-        ret = ""
+      def list_item(page, directory = "", max_depth = 0, current_depth = 0)
+        buffer = ""
         
         if page.class == GitWiki::Page
-          ret += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>} if page.mime_type == "text/plain"
+          buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>} if page.mime_type == "text/plain"
         elsif page.class == Hash
           page.each_pair { |key,value|
             directory += key.to_s + "/"
             title = key.to_s
             title = key.title if key.class == GitWiki::Page
-            ret += '<li><a class="page_name" href="/' + directory.to_s.gsub(/\/$/, "") + '">' + title + "</a><ul>" + list_item(value, directory) + "</ul>" + "</li>"
+            buffer += '<li><a class="page_name" href="/' + directory.to_s.gsub(/\/$/, "") + '">' + title + "</a><ul>" + list_item(value, directory, max_depth, current_depth + 1) + "</ul>" + "</li>"
           }
         elsif page.class == Array
           page.each { |value|
-            ret += list_item(value, directory)
+            if max_depth == 0 || current_depth < max_depth
+              buffer += list_item(value, directory, max_depth, current_depth + 1)
+            end
           }
         end
         
-        ret
+        buffer
       end
       
       def list_contents(page)
-        ret = ""
+        pages = []
+        directory = ""
         
-        page.list_contents.each do |value|
-          title = value
-          title = value.title if value.class == GitWiki::Page
-          if value.class == Hash
-            title = value.first[0].title
-          end
-          url = @page.site_path + "/" + value.to_s
-          ret += %Q{<a class="page_name" href="/#{url}">#{title}</a><br/>}
+        if page.site_path == "Home"
+          pages = Page.find_all
+        else
+          pages = Page.find_all_in(page.site_path)
+          directory = page.site_path + "/"
         end
         
-        ret = "<small><em>No pages in this directory</em></small>" if ret == ""
+        list_item(pages, directory, 1)
+      end
+      
+      def breadcrumbs(page)
+        ret = %Q{<a class="page_name" href="/Home">Home</a>}
+        
+        if !page.nil? && page.site_path != "Home"
+          page.site_path.split("/").inject("") do |memo, part| 
+            memo += part
+            page  = Page.find(memo)
+            ret  += %Q{ / <a class="page_name" href="/#{memo}">#{page.title}</a>} if page.mime_type == "text/plain"
+            memo + "/"
+          end
+        end
         
         ret
       end
@@ -418,15 +433,20 @@ __END__
           = '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="kuznetsovsg">Tweet</a>' if $CONFIG["show_tweet"]
         .span-2.last#evernote_button
           = '<a href="#" onclick="Evernote.doClip({styling:\'none\',contentId:\'content\'});return false;"><img src="http://static.evernote.com/article-clipper.png" alt="Clip in Evernote" style="vertical-align:bottom"></a>' if $CONFIG["show_evernote"]
+      .container
+        .span-24.last
+          #breadcrumbs
+            = breadcrumbs(@page)
 
 @@ show
 - title @page.title
 #contents_container
   #contents
     %a{ :href => "#{@site_path}", :id => "contents_toggler", :rel => "nofollow" } Contents
-    #contents_data{ :style => "display:none" }
+    #contents_data
       %div{ :class => "bottom" }
-        = list_contents(@page)
+        %ul#list
+          = list_contents(@page)
 #content
   #contents_spacer
     &nbsp;
