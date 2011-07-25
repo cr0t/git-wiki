@@ -5,13 +5,14 @@ require "rdiscount"
 
 module GitWiki
   class << self
-    attr_accessor :homepage, :extension, :repository
+    attr_accessor :homepage, :extension, :repository, :repository_path
   end
 
   def self.new(repository, extension, homepage)
-    self.homepage   = homepage
-    self.extension  = extension
-    self.repository = Grit::Repo.new(repository)
+    self.homepage        = homepage
+    self.extension       = extension
+    self.repository_path = repository
+    self.repository      = Grit::Repo.new(repository)
 
     App
   end
@@ -190,6 +191,10 @@ module GitWiki
         []
       end
     end
+    
+    def home_page?
+      site_path == GitWiki.homepage
+    end
 
     private
       def add_to_index_and_commit!(editor_name)
@@ -266,8 +271,7 @@ module GitWiki
       begin
         @page = Page.find_or_create(params[:splat][0])
       rescue => ex
-        p ex
-        p ex.message
+        # do nothing
       end
       haml :edit
     end
@@ -368,7 +372,7 @@ module GitWiki
         pages = []
         directory = ""
         
-        if page.site_path == "Home"
+        if page.site_path == GitWiki.homepage
           pages = Page.find_all
         else
           pages = Page.find_all_in(page.site_path)
@@ -379,9 +383,9 @@ module GitWiki
       end
       
       def breadcrumbs(page)
-        ret = %Q{<a class="page_name" href="/Home">Home</a>}
+        ret = %Q{<a class="page_name" href="/#{GitWiki.homepage}">Home</a>}
         
-        if !page.nil? && page.site_path != "Home"
+        if !page.nil? && page.site_path != GitWiki.homepage
           page.site_path.split("/").inject("") do |memo, part| 
             memo += part
             begin
@@ -394,6 +398,24 @@ module GitWiki
         end
         
         ret
+      end
+      
+      def list_last_changes
+        ret = '<div id="last_changes"><h4>Last changes:</h4><ul class="small">'
+        
+        GitWiki.repository.commits[0..10].each do |commit|
+          quotation_marks_matches = commit.message.match /'(.+)'/
+          
+          unless quotation_marks_matches.nil?
+            site_path = quotation_marks_matches[1].gsub(GitWiki.repository_path, "")
+            site_path = site_path.gsub(".markdown", "")
+            username  = commit.message.match(/by (.+)$/)[1]
+            
+            ret += "<li><a href=\"#{site_path}\">#{site_path}</a>, #{username}, +#{commit.stats.additions}, -#{commit.stats.deletions} (#{commit.date})</li>"
+          end
+        end
+        
+        ret += "</ul></div>"
       end
   end
 end
@@ -458,8 +480,8 @@ __END__
           = list_contents(@page)
 #content
   #contents_spacer
-    &nbsp;
   ~"#{@page.to_html}"
+  = list_last_changes if @page.home_page?
   #edit
     %a{ :href => "/#{@page.site_path}/history", :rel => "nofollow" } History
     |
@@ -498,10 +520,11 @@ var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
 %form{:method => 'POST', :action => "/#{@page.site_path}"}
   %p
     %textarea{:id => "markdown", :name => "body", :rows => 30}= @page.content
-  %p
+  %div{:style => "float:left;"}
     %input.submit{:type => :submit, :value => "Save as the newest version"}
-    or
+  %div{:style => "float:right;"}
     %a.cancel{:href=>"/#{@page.site_path}"} cancel
+  = '<br clear="all"/>'
 
 @@ list
 - title "Listing pages"
@@ -516,9 +539,9 @@ var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
 @@ not_found
 - title "Not Found"
 %h1 Not Found
-%p This site has been changed. Please, go to <a href="/Home">Home page</a> and surf the new wiki site.
+%p This site has been changed. Please, go to <a href="/#{GitWiki.homepage}">Home page</a> and surf the new wiki site.
 
 @@ not_authorized
 - title "Not authorized"
 %h1 Not Authorized
-%p Not authorized. Please, go to <a href="/Home">Home page</a> and surf the new wiki site.
+%p Not authorized. Please, go to <a href="/#{GitWiki.homepage}">Home page</a> and surf the new wiki site.
