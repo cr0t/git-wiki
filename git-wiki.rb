@@ -401,7 +401,7 @@ module GitWiki
       end
       
       def list_last_changes
-        ret = '<div id="last_changes"><h4>Last changes:</h4><ul class="small">'
+        ret = '<h4>Last changes:</h4><ul class="small">'
         
         GitWiki.repository.commits[0..10].each do |commit|
           quotation_marks_matches = commit.message.match /'(.+)'/
@@ -415,7 +415,7 @@ module GitWiki
           end
         end
         
-        ret += "</ul></div>"
+        ret += '</ul>'
       end
   end
 end
@@ -481,7 +481,8 @@ __END__
 #content
   #contents_spacer
   ~"#{@page.to_html}"
-  = list_last_changes if @page.home_page?
+  #last_changes
+    = list_last_changes if @page.home_page?
   #edit
     %a{ :href => "/#{@page.site_path}/history", :rel => "nofollow" } History
     |
@@ -520,9 +521,9 @@ var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
 %form{:method => 'POST', :action => "/#{@page.site_path}"}
   %p
     %textarea{:id => "markdown", :name => "body", :rows => 30}= @page.content
-  %div{:style => "float:left;"}
+  #save_button
     %input.submit{:type => :submit, :value => "Save as the newest version"}
-  %div{:style => "float:right;"}
+  #cancel_button
     %a.cancel{:href=>"/#{@page.site_path}"} cancel
   = '<br clear="all"/>'
 

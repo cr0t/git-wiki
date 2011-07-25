@@ -43,11 +43,9 @@ ul#list {
 	}
 }
 
-::-moz-selection { background: #FF5E99; color:#fff; text-shadow: none; }
+::-moz-selection, ::selection, selection { background: #aaa; color:#fff; text-shadow: none; }
 
-::selection { background:#FF5E99; color:#fff; text-shadow: none; }
-
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5, h6 {
 	color       : #272727;
 	font-weight : normal;
 	font-family : 'Droid Serif', 'Georgia', serif;
@@ -57,7 +55,7 @@ h1, h2, h3, h4 {
 h1 { font-size : 26px; }
 h2 { font-size : 22px; }
 h3 { font-size : 18px; }
-h4 { font-size : 14px; }
+h4, h5, h6 { font-size : 14px; }
 
 #topmenu {
 	position : fixed;
@@ -126,6 +124,22 @@ h4 { font-size : 14px; }
 	border     : 2px solid #fff;
 	left       : 750px;
 	overflow   : auto;
+}
+
+#last_changes {
+	color : #888;
+	
+	h4, a {
+		color : #888;
+	}
+}
+
+#save_button {
+	float : left;
+}
+
+#cancel_button {
+	float : right;
 }
 
 @import 'fileuploader.less';

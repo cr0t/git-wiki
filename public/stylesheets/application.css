@@ -56,12 +56,12 @@ body > #wrap {
 }
 ul#list { padding-left: 0; }
 ul#list li { list-style: none; }
-::-moz-selection, selection {
-  background: #ff5e99;
+::-moz-selection, ::selection, selection {
+  background: #aaaaaa;
   color: #ffffff;
   text-shadow: none;
 }
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5, h6 {
   color: #272727;
   font-weight: normal;
   font-family: 'Droid Serif', 'Georgia', serif;
@@ -70,7 +70,7 @@ h1, h2, h3, h4 {
 h1 { font-size: 26px; }
 h2 { font-size: 22px; }
 h3 { font-size: 18px; }
-h4 { font-size: 14px; }
+h4, h5, h6 { font-size: 14px; }
 #topmenu {
   position: fixed;
   top: 0;
@@ -123,6 +123,11 @@ h4 { font-size: 14px; }
   left: 750px;
   overflow: auto;
 }
+#last_changes { color: #888888; }
+#last_changes h4 { color: #888888; }
+#last_changes a { color: #888888; }
+#save_button { float: left; }
+#cancel_button { float: right; }
 #file-uploader {
   float: right;
   text-shadow: none;
