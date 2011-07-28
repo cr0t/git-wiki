@@ -8,19 +8,22 @@ user's home directory who will run this application.
 
 Here is an example of wiki.yaml:
 
-	use_ga_tracking : false
-	ga_account      : UA-*******-**
-	show_contents   : true
-	show_tree       : true
-	show_fb         : false
-	show_tweet      : false
-	show_evernote   : true
-	logo_text       : just-a-wiki
-	users:
-	  - username : admin
-	    password : uoWeix3c
-	  - username : moderator
-	    password : xooQu1xe
+  use_ga_tracking : false
+  ga_account      : UA-*******-**
+  show_contents   : false
+  show_tree       : true
+  show_fb         : true
+  show_tweet      : true
+  show_evernote   : true
+  show_plusone    : true
+  show_last_edits : false
+  logo_text       : just-a-wiki
+  users:
+    - username : admin
+      password : uoWeix3c
+    - username : moderator
+      password : xooQu1xe
+
 
 Next you need to create <code>wiki</code> also in the user's home directory
 and initialize empty git repo in it:

@@ -30,7 +30,7 @@ body > #wrap {
 }
 .page {
   text-shadow: 0 -1px 1px #ffffff;
-  padding-top: 50px;
+  padding-top: 60px;
 }
 .page pre {
   overflow: auto;
@@ -80,15 +80,23 @@ h4, h5, h6 { font-size: 14px; }
 }
 #topmenu .span-4 { text-align: center; }
 #topmenu .span-6 { text-align: center; }
+#topmenu #plusone_button {
+  text-align: right;
+  padding-top: 2px;
+}
 #topmenu #like_button {
   text-align: right;
-  padding-top: 5px;
+  padding-top: 2px;
 }
 #topmenu #tweet_button {
   text-align: right;
-  padding-top: 5px;
+  padding-top: 2px;
 }
-#topmenu #evernote_button { text-align: right; }
+#topmenu #evernote_button {
+  text-align: right;
+  line-height: 18px;
+  padding-top: 3px;
+}
 #topmenu #breadcrumbs { font-size: 0.8em; }
 #topmenu #create_new_page_block {
   font-size: 0.8em;

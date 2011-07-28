@@ -439,6 +439,7 @@ __END__
     = '<script type="text/javascript" src="/javascripts/application.js"></script>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>' if $CONFIG["show_tweet"]
     = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>' if $CONFIG["show_evernote"]
+    = '<script type="text/javascript">(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>' if $CONFIG["show_plusone"]
     = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>' if $CONFIG["use_ga_tracking"]
   %body
     #wrap
@@ -449,13 +450,15 @@ __END__
         = 'Code based on <a href="https://github.com/sr/git-wiki" target="_blank">git-wiki</a> project. You can get copy of code of this wiki at <a href="https://github.com/cr0t/git-wiki" target="_blank">github.com</a>.'
     #topmenu
       .container
-        .span-10
+        .span-8
           %a{ :href => "/#{GitWiki.homepage}" }
             = $CONFIG["logo_text"]
         .span-3
           %a{ :href => "/pages" } all pages
         .span-2
           <a href="#" id="font_plus">A+</a>&nbsp;<a href="#" id="font_minus">a-</a>
+        .span-2#plusone_button
+          = '<g:plusone size="medium"></g:plusone>' if $CONFIG["show_plusone"]
         .span-4#like_button
           = '<iframe src="http://www.facebook.com/plugins/like.php?href=' + request.url.to_s + '&amp;layout=button_count&amp;show_faces=true&amp;width=140&amp;action=recommend&amp;font&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" style="border:none;overflow:hidden;width:140px;height:21px;" allowTransparency="true"></iframe>' if $CONFIG["show_fb"]
         .span-3#tweet_button
@@ -483,8 +486,9 @@ __END__
 #content
   #contents_spacer
   ~"#{@page.to_html}"
-  #last_changes
-    = list_last_changes if @page.home_page?
+  - if @page.home_page? && $CONFIG["show_last_edits"]
+    #last_changes
+      = list_last_changes
   #edit
     %a{ :href => "/#{@page.site_path}/history", :rel => "nofollow" } History
     |
