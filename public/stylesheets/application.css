@@ -30,7 +30,7 @@ body > #wrap {
 }
 .page {
   text-shadow: 0 -1px 1px #ffffff;
-  padding-top: 40px;
+  padding-top: 50px;
 }
 .page pre {
   overflow: auto;
@@ -56,7 +56,7 @@ body > #wrap {
 }
 ul#list { padding-left: 0; }
 ul#list li { list-style: none; }
-::-moz-selection, ::selection, selection {
+::-moz-selection, ::selection {
   background: #aaaaaa;
   color: #ffffff;
   text-shadow: none;

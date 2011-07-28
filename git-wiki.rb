@@ -471,13 +471,15 @@ __END__
 
 @@ show
 - title @page.title
-#contents_container
-  #contents
-    %a{ :href => "#{@site_path}", :id => "contents_toggler", :rel => "nofollow" } Contents
-    #contents_data
-      %div{ :class => "bottom" }
-        %ul#list
-          = list_contents(@page)
+- if $CONFIG["show_contents"]
+  #contents_container
+    #contents
+      %a{ :href => "#{@site_path}", :id => "contents_toggler", :rel => "nofollow" } Contents
+      #contents_data
+        %div{ :class => "bottom" }
+          %ul#list
+            = list_contents(@page)
+            
 #content
   #contents_spacer
   ~"#{@page.to_html}"
