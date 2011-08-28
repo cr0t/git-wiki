@@ -16,13 +16,20 @@ $(document).ready(function () {
 		}
 	});
 	
-	$("#create_new_page").click(function (e){
+	$("#create_new_page").click(function (e) {
 		e.preventDefault();
 		
-		var site_path = prompt("Please, input the new page site path", window.location.pathname);
+		var site_path = prompt("Please, input the new page site path (short name), it will be available at: " + window.location.pathname + "/", "");
 		
 		if (site_path != null && site_path != "") {
-			window.location = window.location.origin + site_path;
+			// clean site path from some symbols
+			console.log("1");
+			site_path = site_path.replace(/[ \.!@#$%^&*\(\)]+/g, "_");
+			console.log("2", site_path);
+			window.location = window.location.pathname + "/" + site_path;
+		}
+		else {
+			alert("Please input the new page site path");
 		}
 	});
 	

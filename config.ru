@@ -1,6 +1,6 @@
 # This file is used by Rack-based servers to start the application.
 
-require "git-wiki"
+require File.dirname(__FILE__) + "/git-wiki"
 require "yaml"
 
 $CONFIG = YAML.load(File.read(File.expand_path("~/wiki.yaml", __FILE__)))
