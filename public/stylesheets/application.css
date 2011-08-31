@@ -54,9 +54,13 @@ body > #wrap {
   padding: 0;
   text-align: right;
 }
+.gist pre {
+  color: default;
+  text-shadow: none;
+}
 ul#list { padding-left: 0; }
 ul#list li { list-style: none; }
-::-moz-selection, ::selection {
+::-moz-selection, selection {
   background: #aaaaaa;
   color: #ffffff;
   text-shadow: none;
