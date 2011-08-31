@@ -46,7 +46,7 @@ body > #wrap {
   border-radius: 2px;
 }
 .page .gist pre {
-  color: none;
+  color: #000000;
   text-shadow: none;
 }
 .page blockquote {
