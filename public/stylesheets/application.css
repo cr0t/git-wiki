@@ -45,6 +45,10 @@ body > #wrap {
   -webkit-border-radius: 2px;
   border-radius: 2px;
 }
+.page .gist pre {
+  color: none;
+  text-shadow: none;
+}
 .page blockquote {
   border-left: 8px solid #cccccc;
   padding-left: 8px;
@@ -53,10 +57,6 @@ body > #wrap {
 .page #edit {
   padding: 0;
   text-align: right;
-}
-.gist pre {
-  color: default;
-  text-shadow: none;
 }
 ul#list { padding-left: 0; }
 ul#list li { list-style: none; }
