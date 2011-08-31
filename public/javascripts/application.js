@@ -23,9 +23,7 @@ $(document).ready(function () {
 		
 		if (site_path != null && site_path != "") {
 			// clean site path from some symbols
-			console.log("1");
 			site_path = site_path.replace(/[ \.!@#$%^&*\(\)]+/g, "_");
-			console.log("2", site_path);
 			window.location = window.location.pathname + "/" + site_path;
 		}
 		else {

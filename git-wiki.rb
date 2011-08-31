@@ -417,6 +417,10 @@ module GitWiki
         
         ret += '</ul>'
       end
+      
+      def mtime(filepath)
+        File.mtime(File.join(File.dirname(__FILE__), filepath)).to_i.to_s
+      end
   end
 end
 
@@ -433,10 +437,10 @@ __END__
     = '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
     = '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
     = '<!--[if IE]><style type="text/css">#topmenu{background-color:#fff;}</style><![endif]-->'
-    = '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
+    = '<link rel="stylesheet" href="/stylesheets/application.css?' + mtime("public/stylesheets/application.css") + '" media="screen, projection" type="text/css"/>'
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>'
-    = '<script type="text/javascript" src="/javascripts/application.js"></script>'
+    = '<script type="text/javascript" src="/javascripts/application.js?' + mtime("public/javascripts/application.js") + '"></script>'
     = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>' if $CONFIG["show_tweet"]
     = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>' if $CONFIG["show_evernote"]
     = '<script type="text/javascript">(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>' if $CONFIG["show_plusone"]
