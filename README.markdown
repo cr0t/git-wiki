@@ -8,6 +8,7 @@ user's home directory who will run this application.
 
 Here is an example of wiki.yaml:
 
+    wiki_repo_path  : /Users/cr0t/tmp/wiki_repo
     use_ga_tracking : false
     ga_account      : UA-*******-**
     show_contents   : false
