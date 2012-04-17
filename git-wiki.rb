@@ -412,6 +412,7 @@ module GitWiki
             site_path = site_path.gsub(".markdown", "")
             username  = commit.message.match(/by (.+)$/)[1]
 
+            # we collect only distinct changes
             if changes.any? { |c| c[:site_path] == site_path }
               next
             else
@@ -458,10 +459,14 @@ __END__
     = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
     = '<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>'
     = '<script type="text/javascript" src="/javascripts/application.js?' + mtime("public/javascripts/application.js") + '"></script>'
-    = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>' if $CONFIG["show_tweet"]
-    = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>' if $CONFIG["show_evernote"]
-    = '<script type="text/javascript">(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>' if $CONFIG["show_plusone"]
-    = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>' if $CONFIG["use_ga_tracking"]
+    - if $CONFIG["show_tweet"]
+      = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
+    - if $CONFIG["show_evernote"]
+      = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>'
+    - if $CONFIG["show_plusone"]
+      = '<script type="text/javascript">(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>'
+    - if $CONFIG["use_ga_tracking"]
+      = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
   %body
     #wrap
       #main.container.page
