@@ -1,6 +1,5 @@
 require "sinatra/base"
 require "haml"
-require "grit"
 require "rdiscount"
 
 module GitWiki
