@@ -30,7 +30,7 @@ module GitWiki
       return [] if repository.tree.contents.empty?
       collect_blobs(repository.tree)
     end
-    
+
     def self.find_all_in(path)
       repository_tree = repository.tree / path
       return [] if repository_tree.contents.empty?
@@ -38,7 +38,7 @@ module GitWiki
     rescue
       []
     end
-    
+
     def self.collect_blobs(tree, depth = 65535)
       begin
         blobs = tree.contents.collect do |blob_or_tree|
@@ -85,7 +85,7 @@ module GitWiki
     def self.extension
       GitWiki.extension || raise
     end
-    
+
     def self.image_extensions
       /(png|jpg|jpeg|gif)$/
     end
@@ -101,7 +101,7 @@ module GitWiki
     def self.create_blob_for(page_name, image = false)
       blob_name = page_name + extension
       blob_name = page_name if image
-      
+
       Grit::Blob.create(repository, {
         :name => blob_name,
         :data => ""
@@ -134,11 +134,11 @@ module GitWiki
     def name
       @blob.name.gsub(/#{File.extname(@blob.name)}$/, '')
     end
-    
+
     def site_path
       @site_path
     end
-    
+
     def title
       content.to_s.split("\n")[0].strip
     rescue
@@ -158,7 +158,7 @@ module GitWiki
       File.open(file_name, "w") { |f| f << new_content }
       add_to_index_and_commit!(editor_name)
     end
-    
+
     def revisions
       Page.repository.commits_since.map { |commit|
         commit_hash = commit.stats.to_hash
@@ -170,11 +170,11 @@ module GitWiki
         } if commit_hash["files"].first.first == site_path + GitWiki.extension
       }.compact
     end
-    
+
     def mime_type
       @blob.mime_type
     end
-    
+
     def list_images
       path = Page.repository.working_dir + "/" + @site_path
       if File.exists?(path)
@@ -183,7 +183,7 @@ module GitWiki
         []
       end
     end
-    
+
     def list_contents
       begin
         Page.find_all_in(@site_path)
@@ -191,7 +191,7 @@ module GitWiki
         []
       end
     end
-    
+
     def home_page?
       site_path == GitWiki.homepage
     end
@@ -203,11 +203,11 @@ module GitWiki
           self.class.repository.commit_index(commit_message(editor_name))
         }
       end
-      
+
       def file_name
         extension = self.class.extension
         extension = "" if @image
-        
+
         unless @site_path.empty?
           File.join(self.class.repository.working_dir, @site_path + extension)
         else
@@ -218,19 +218,19 @@ module GitWiki
       def commit_message(editor_name)
         new? ? "created '#{file_name}' by #{editor_name}" : "updated '#{file_name}' by #{editor_name}"
       end
-      
+
       # prepare and creates new directory structure for the files
       def create_new_dirs_structure(file_name)
         dir_path_pieces = file_name.gsub(self.class.repository.working_dir, "").split("/").compact
         dir_path_pieces.pop(1) # remove filename.markdown
-        
+
         dir_path_pieces.reduce("") do |memo,dir_piece|
           directory_path = self.class.repository.working_dir + "/" + memo + "/" + dir_piece
-          
+
           unless File.exist?(directory_path)
             Dir.mkdir(directory_path)
           end
-          
+
           memo + "/" + dir_piece
         end
       end
@@ -242,11 +242,11 @@ module GitWiki
                  :attr_wrapper  => '"'     }
     enable :inline_templates
     enable :sessions
-    
+
     not_found do
       haml :not_found
     end
-    
+
     error PageNotFound do
       page = request.env["sinatra.error"].name.gsub /\/$/, ""
       redirect "/#{page}/edit"
@@ -275,7 +275,7 @@ module GitWiki
       end
       haml :edit
     end
-    
+
     get "/*/history" do
       @page = Page.find(params[:splat][0])
       haml :history
@@ -291,7 +291,7 @@ module GitWiki
         haml :show
       end
     end
-    
+
     post "/preview" do
       css  = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
       css += '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
@@ -299,10 +299,10 @@ module GitWiki
       css += '<link rel="stylesheet" href="/stylesheets/application.css" media="screen, projection" type="text/css"/>'
       css + '<div class="page container">' + RDiscount.new(params[:data]).to_html + '</div>'
     end
-    
+
     post "/upload" do
       content_type "application/json"
-      
+
       begin
         protected!
         name     = params[:qqfile]
@@ -317,13 +317,13 @@ module GitWiki
 
     post "/*" do
       protected! if params[:splat][0] != "/favicon.ico"
-      
+
       @page = Page.find_or_create(params[:splat][0])
       @page.update_content(params[:body], @auth.credentials.first)
-      
+
       redirect "/#{@page.site_path}"
     end
-    
+
     def protected!
       unless authorized?
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
@@ -333,7 +333,7 @@ module GitWiki
 
     def authorized?
       @auth ||= Rack::Auth::Basic::Request.new(request.env)
-      
+
       if @auth.provided? && @auth.basic? && @auth.credentials
         $CONFIG["users"].any? { |account| @auth.credentials == [ account["username"], account["password"] ] }
       end
@@ -347,7 +347,7 @@ module GitWiki
 
       def list_item(page, directory = "", max_depth = 0, current_depth = 0)
         buffer = ""
-        
+
         if page.class == GitWiki::Page
           buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>} if page.mime_type == "text/plain"
         elsif page.class == Hash
@@ -364,29 +364,29 @@ module GitWiki
             end
           }
         end
-        
+
         buffer
       end
-      
+
       def list_contents(page)
         pages = []
         directory = ""
-        
+
         if page.site_path == GitWiki.homepage
           pages = Page.find_all
         else
           pages = Page.find_all_in(page.site_path)
           directory = page.site_path + "/"
         end
-        
+
         list_item(pages, directory, 1)
       end
-      
+
       def breadcrumbs(page)
         ret = %Q{<a class="page_name" href="/#{GitWiki.homepage}">Home</a>}
-        
+
         if !page.nil? && page.site_path != GitWiki.homepage
-          page.site_path.split("/").inject("") do |memo, part| 
+          page.site_path.split("/").inject("") do |memo, part|
             memo += part
             begin
               page  = Page.find(memo)
@@ -396,28 +396,28 @@ module GitWiki
             memo + "/"
           end
         end
-        
+
         ret
       end
-      
+
       def list_last_changes
         ret = '<h4>Last changes:</h4><ul class="small">'
-        
+
         GitWiki.repository.commits[0..10].each do |commit|
           quotation_marks_matches = commit.message.match /'(.+)'/
-          
+
           unless quotation_marks_matches.nil?
             site_path = quotation_marks_matches[1].gsub(GitWiki.repository_path, "")
             site_path = site_path.gsub(".markdown", "")
             username  = commit.message.match(/by (.+)$/)[1]
-            
+
             ret += "<li><a href=\"#{site_path}\">#{site_path}</a>, #{username}, +#{commit.stats.additions}, -#{commit.stats.deletions} (#{commit.date})</li>"
           end
         end
-        
+
         ret += '</ul>'
       end
-      
+
       def mtime(filepath)
         File.mtime(File.join(File.dirname(__FILE__), filepath)).to_i.to_s
       end
@@ -486,7 +486,7 @@ __END__
         %div{ :class => "bottom" }
           %ul#list
             = list_contents(@page)
-            
+
 #content
   #contents_spacer
   ~"#{@page.to_html}"
