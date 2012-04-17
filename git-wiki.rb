@@ -402,7 +402,9 @@ module GitWiki
       def list_last_changes
         ret = '<h4>Last changes:</h4><ul class="small">'
 
-        GitWiki.repository.commits[0..10].each do |commit|
+        changes = []
+
+        GitWiki.repository.commits('master', 1000).each do |commit|
           quotation_marks_matches = commit.message.match /'(.+)'/
 
           unless quotation_marks_matches.nil?
@@ -410,9 +412,25 @@ module GitWiki
             site_path = site_path.gsub(".markdown", "")
             username  = commit.message.match(/by (.+)$/)[1]
 
-            ret += "<li><a href=\"#{site_path}\">#{site_path}</a>, #{username}, +#{commit.stats.additions}, -#{commit.stats.deletions} (#{commit.date})</li>"
+            if changes.any? { |c| c[:site_path] == site_path }
+              next
+            else
+              changes << {
+                :site_path => site_path,
+                :username  => username,
+                :commit    => commit
+              }
+            end
+          end
+
+          if changes.size == 10
+            break
           end
         end
+
+        ret += changes.map { |c|
+          "<li><a href=\"#{c[:site_path]}\">#{c[:site_path]}</a>, #{c[:username]}, +#{c[:commit].stats.additions}, -#{c[:commit].stats.deletions} (#{c[:commit].date})</li>"
+        }.join
 
         ret += '</ul>'
       end
