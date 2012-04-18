@@ -29,19 +29,26 @@ Here is an example of wiki.yaml:
 Next you need to create <code>wiki</code> also in the user's home directory
 and initialize empty git repo in it:
 
-	$ cd ~
-	$ mkdir wiki
-	$ cd wiki
-	$ git init
+    $ cd ~
+    $ mkdir wiki
+    $ cd wiki
+    $ git init
 
 That is all! You can use Passenger or Unicorn to run this application.
 
 To develop this fork, use <code>shotgun</code> gem:
 
-	$ sudo gem install shotgun
-	$ shotgun config.ru
+    $ sudo gem install shotgun
+    $ shotgun config.ru
 
-Text below is the original README from git-wiki project.
+Troubleshooting
+---
+
+If you are using UTF-8 filenames in the git repository you can get something like that "\320\257..." instead of normal filenames in the 'Latest changes' section on the main page. You need to add <code>"core.quotepath = false"</code> option to gitconfig file:
+
+    $ git config core.quotepath false
+
+The text below is the original README from git-wiki project.
 
 git-wiki: because who needs cool names when you use git?
 ========================================================

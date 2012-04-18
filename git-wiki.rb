@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require "sinatra/base"
 require "haml"
 require "rdiscount"
@@ -405,28 +407,22 @@ module GitWiki
         changes = []
 
         GitWiki.repository.commits('master', 1000).each do |commit|
-          quotation_marks_matches = commit.message.match /'(.+)'/
+          changed_file = commit.stats.files.first
+          site_path    = "/" + changed_file.first.gsub(".markdown", "")
+          username     = commit.message.match(/by (.+)$/)[1]
 
-          unless quotation_marks_matches.nil?
-            site_path = quotation_marks_matches[1].gsub(GitWiki.repository_path, "")
-            site_path = site_path.gsub(".markdown", "")
-            username  = commit.message.match(/by (.+)$/)[1]
-
-            # we collect only distinct changes
-            if changes.any? { |c| c[:site_path] == site_path }
-              next
-            else
-              changes << {
-                :site_path => site_path,
-                :username  => username,
-                :commit    => commit
-              }
-            end
+          # we collect only distinct changes
+          if changes.any? { |c| c[:site_path] == site_path }
+            next
+          else
+            changes << {
+              :site_path => site_path,
+              :username  => username,
+              :commit    => commit
+            }
           end
 
-          if changes.size == 10
-            break
-          end
+          break if changes.size == 10
         end
 
         ret += changes.map { |c|
