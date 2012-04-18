@@ -350,7 +350,13 @@ module GitWiki
         buffer = ""
 
         if page.class == GitWiki::Page
-          buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>} if page.mime_type == "text/plain"
+          if page.mime_type == "text/plain"
+            if page.title.length > 0
+              buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>}
+            else
+              buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page}</a></li>}
+            end
+          end
         elsif page.class == Hash
           page.each_pair { |key,value|
             directory += key.to_s + "/"
@@ -407,22 +413,25 @@ module GitWiki
         changes = []
 
         GitWiki.repository.commits('master', 1000).each do |commit|
-          changed_file = commit.stats.files.first
-          site_path    = "/" + changed_file.first.gsub(".markdown", "")
-          username     = commit.message.match(/by (.+)$/)[1]
+          begin
+            changed_file = commit.stats.files.first
+            site_path    = "/" + changed_file.first.gsub(".markdown", "")
+            username     = commit.message.match(/by (.+)$/)[1]
 
-          # we collect only distinct changes
-          if changes.any? { |c| c[:site_path] == site_path }
-            next
-          else
-            changes << {
-              :site_path => site_path,
-              :username  => username,
-              :commit    => commit
-            }
+            # we collect only distinct changes
+            if changes.any? { |c| c[:site_path] == site_path }
+              next
+            else
+              changes << {
+                :site_path => site_path,
+                :username  => username,
+                :commit    => commit
+              }
+            end
+
+            break if changes.size == 10
+          rescue
           end
-
-          break if changes.size == 10
         end
 
         ret += changes.map { |c|
