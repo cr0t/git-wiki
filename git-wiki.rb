@@ -266,6 +266,16 @@ module GitWiki
       haml :list
     end
 
+    get "/search" do
+      res  = "search query: #{params[:query]}<br/>"
+      res += "search path: #{$CONFIG['wiki_repo_path']}<br/>"
+      res += "results:<br/>"
+      ack = `which ack`.strip
+      ack_cmd = "#{ack} -i #{params[:query]}"
+      res += `cd #{$CONFIG['wiki_repo_path']} && #{ack_cmd}`.gsub(/\n/, "<br/>")
+      res
+    end
+
     get "/*/edit" do
       # why browser want to "GET /favicon.ico/edit" ?
       protected! if params[:splat][0] != "/favicon.ico"
