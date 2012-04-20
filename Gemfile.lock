@@ -11,6 +11,7 @@ GEM
     rack-protection (1.2.0)
       rack
     rdiscount (1.6.8)
+    ruby-stemmer (0.9.3)
     shotgun (0.9)
       rack (>= 1.0)
     sinatra (1.3.2)
@@ -26,5 +27,6 @@ DEPENDENCIES
   grit
   haml
   rdiscount
+  ruby-stemmer
   shotgun
   sinatra
