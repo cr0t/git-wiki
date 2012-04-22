@@ -1,17 +1,23 @@
 $(document).ready(function()	{
 	$('#markdown').markItUp(mySettings);
-	
+
 	var pathname = window.location.pathname;
 	var current_sitepath = pathname.substring(0, pathname.indexOf("edit") - 1);
-	
+
 	var uploader = new qq.FileUploader({
 		element           : document.getElementById("file-uploader"),
 		action            : "/upload",
-		allowedExtensions : [ "png", "jpg", "jpeg", "gif" ],
+		// allowedExtensions : [ "png", "jpg", "jpeg", "gif" ],
 		params            : { sitepath : current_sitepath },
-		debug             : false
+		debug             : false,
+		template          : '<div class="qq-uploader">' +
+		                      '<div class="qq-upload-drop-area"><span>Drop files here to upload</span></div>' +
+		                      '<div class="qq-upload-button">Upload a file</div>' +
+		                      '<div class="qq-upload-speed"></div>' +
+		                      '<ul class="qq-upload-list"></ul>' +
+		                    '</div>'
 	});
-	
+
 	// fill images list when page loaded (LOCAL_IMAGES filled in view file)
 	if (LOCAL_IMAGES.length > 0) {
 		for (i = 0; i < LOCAL_IMAGES.length; i++) {
@@ -19,9 +25,15 @@ $(document).ready(function()	{
 			$(".qq-upload-list").append(element);
 		}
 	}
-	
+
 	$(".qq-upload-file").live("click", function () {
-		$('#markdown').insertAtCaret('![](' + current_sitepath + '/' + $(this).html() + ' "")');
+		img_regex = /(png|jpg|jpeg|gif)/gi;
+		if ($(this).html().match(img_regex) !== null) {
+			$('#markdown').insertAtCaret('![](' + current_sitepath + '/' + $(this).html() + ' "")');
+		}
+		else {
+			$('#markdown').insertAtCaret('<a href="' + current_sitepath + '/' + $(this).html() + '" target="_blank">' + $(this).html() + '</a>');
+		}
 	});
 });
 
@@ -35,7 +47,7 @@ var mySettings = {
 		{ name: 'Heading 4', key: '4', openWith: '#### ', placeHolder: 'Your title here...' },
 		{ name: 'Heading 5', key: '5', openWith: '##### ', placeHolder: 'Your title here...' },
 		{ name: 'Heading 6', key: '6', openWith: '###### ', placeHolder: 'Your title here...' },
-		{ separator: '---------------' },		
+		{ separator: '---------------' },
 		{ name: 'Bold', key: 'B', openWith: '**', closeWith: '**'},
 		{ name: 'Italic', key: 'I', openWith: '_', closeWith: '_'},
 		{ separator: '---------------' },
@@ -44,7 +56,7 @@ var mySettings = {
 		{ separator: '---------------' },
 		{ name: 'Picture', key: 'P', replaceWith: '![[![Alternative text]!]]([![Url:!:http://]!] "[![Title]!]")'},
 		{ name: 'Link', key: 'L', openWith: '[', closeWith: ']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Your text to link here...' },
-		{ separator: '---------------'},	
+		{ separator: '---------------'},
 		{ name: 'Quotes', openWith: '> '},
 		{ name: 'Code Block / Code', openWith: '(!(\t|!|`)!)', closeWith: '(!(`)!)'},
 		{ separator: '---------------'},

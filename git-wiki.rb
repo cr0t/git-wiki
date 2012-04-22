@@ -88,13 +88,13 @@ module GitWiki
       GitWiki.extension || raise
     end
 
-    def self.image_extensions
-      /(png|jpg|jpeg|gif)$/
+    def self.files_extensions
+      /(png|jpg|jpeg|gif|doc|pdf|xls|rtf|txt)$/i
     end
 
     def self.find_blob(page_name)
       found_ext   = extension
-      ext_matches = page_name.match(Page.image_extensions)
+      ext_matches = page_name.match(Page.files_extensions)
       found_ext   = "" if !ext_matches.nil?
       repository.tree / (page_name + found_ext)
     end
@@ -114,7 +114,7 @@ module GitWiki
     def initialize(blob, path_on_site = "")
       @blob = blob
       @site_path = path_on_site
-      if path_on_site.match(Page.image_extensions).nil?
+      if path_on_site.match(Page.files_extensions).nil?
         @image = false
       else
         @image = true
@@ -181,7 +181,7 @@ module GitWiki
     def list_images
       path = Page.repository.working_dir + "/" + @site_path
       if File.exists?(path)
-        Dir.open(path).entries.map { |e| e if (!e.match(Page.image_extensions).nil? && File.file?(path + "/" + e)) }.compact
+        Dir.open(path).entries.map { |e| e if (!e.match(Page.files_extensions).nil? && File.file?(path + "/" + e)) }.compact
       else
         []
       end
@@ -320,10 +320,10 @@ module GitWiki
       protected! if params[:splat][0] != "/favicon.ico"
       begin
         @page = Page.find_or_create(params[:splat][0])
-      rescue => ex
-        # do nothing
+        haml :edit
+      rescue
+        ""
       end
-      haml :edit
     end
 
     get "/*/history" do
@@ -333,7 +333,7 @@ module GitWiki
 
     get "/*" do
       @page = Page.find(params[:splat][0])
-      matched_ext = params[:splat][0].match(Page.image_extensions)
+      matched_ext = params[:splat][0].match(Page.files_extensions)
       if !matched_ext.nil?
         content_type "image/" + matched_ext[0]
         @page.content
