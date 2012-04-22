@@ -3,6 +3,7 @@
 require "sinatra/base"
 require "haml"
 require "rdiscount"
+require "lingua/stemmer"
 
 module GitWiki
   class << self
@@ -143,6 +144,7 @@ module GitWiki
     def title
       content.to_s.split("\n")[0].strip
     rescue
+      ""
     end
 
     def content
@@ -257,6 +259,11 @@ module GitWiki
       content_type "text/html", :charset => "utf-8"
     end
 
+    helpers do
+      include Rack::Utils
+      alias_method :h, :escape
+    end
+
     get "/" do
       redirect "/" + GitWiki.homepage
     end
@@ -267,13 +274,45 @@ module GitWiki
     end
 
     get "/search" do
-      res  = "search query: #{params[:query]}<br/>"
-      res += "search path: #{$CONFIG['wiki_repo_path']}<br/>"
-      res += "results:<br/>"
-      ack = `which ack`.strip
-      ack_cmd = "#{ack} -i #{params[:query]}"
-      res += `cd #{$CONFIG['wiki_repo_path']} && #{ack_cmd}`.gsub(/\n/, "<br/>")
-      res
+      haml :search_form
+    end
+
+    post "/search" do
+      if params[:q].nil? || params[:q].length == 0
+        @error_msg = "You have not specified the query string"
+        haml :search_form
+      else
+        lang = "ru"
+        lang = "en" if params[:q].force_encoding("UTF-8").ascii_only?
+        stemmer = Lingua::Stemmer.new(:language => lang)
+
+        @stem = stemmer.stem(params[:q])
+
+        ack_str = `which ack`.strip
+        ack_cmd = "#{ack_str} --flush --nogroup --nocolour -i #{@stem}"
+        @raw_results = `cd #{$CONFIG['wiki_repo_path']} && #{ack_cmd}`
+
+        strings = @raw_results.split("\n")
+
+        found = {}
+        strings.each do |str|
+          meta_info  = str.split(":", 3)
+          filename   = meta_info[0].to_s
+          lineno     = meta_info[1].to_i
+          fount_text = meta_info[2]
+          if found.has_key? filename
+            found[filename][:hits] += 1
+          else
+            found[filename] = {
+              :hits => 1
+            }
+          end
+        end
+
+        @search_results = found.sort_by { |f| f[1][:hits] }.reverse
+
+        haml :search
+      end
     end
 
     get "/*/edit" do
@@ -361,7 +400,7 @@ module GitWiki
 
         if page.class == GitWiki::Page
           if page.mime_type == "text/plain"
-            if page.title.length > 0
+            unless page.title.nil?
               buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page.title}</a></li>}
             else
               buffer += %Q{<li><a class="page_name" href="/#{directory}#{page}">#{page}</a></li>}
@@ -491,9 +530,11 @@ __END__
         = 'Code based on <a href="https://github.com/sr/git-wiki" target="_blank">git-wiki</a> project. You can get copy of code of this wiki at <a href="https://github.com/cr0t/git-wiki" target="_blank">github.com</a>.'
     #topmenu
       .container
-        .span-8
+        .span-5#logo
           %a{ :href => "/#{GitWiki.homepage}" }
             = $CONFIG["logo_text"]
+        .span-3
+          <a href="/search">Search</a>
         .span-3
           %a{ :href => "/pages" } all pages
         .span-2
@@ -593,3 +634,33 @@ var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
 - title "Not authorized"
 %h1 Not Authorized
 %p Not authorized. Please, go to <a href="/#{GitWiki.homepage}">Home page</a> and surf the new wiki site.
+
+@@ search_form
+- title "Search"
+#content
+  - if @error_msg
+    .span-24.last
+      %p.error #{@error_msg}
+
+  %h2 Please input search query to the field below:
+  .span-24.last
+    %form{ :method => "post" }
+      %input{ :type => "text", :name => "q", :id => "q" }
+      %br
+      %input{ :type => "submit", :value => "Search", :id => "search_btn" }
+
+@@ search
+- title "Search results"
+#content
+  .span-24.last
+    %form{ :method => "post" }
+      %input{ :type => "text", :name => "q", :id => "q", :value => params[:q] }
+      %br
+      %input{ :type => "submit", :value => "Search", :id => "search_btn" }
+  %h2 Search results for <strong>"#{params[:q]}"</strong> ("#{@stem}"):
+  .span-24.last
+    %ol
+      - @search_results.each do |file|
+        %li
+          %a{:href=>"/#{file.first.gsub(/\.markdown/, '')}"} /#{file.first.gsub(/\.markdown/, '')}
+          = ", hits: #{file[1][:hits]}"

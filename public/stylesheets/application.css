@@ -82,6 +82,7 @@ h4, h5, h6 { font-size: 14px; }
   background-color: rgba(255, 255, 255, 0.9);
   border-bottom: 2px solid #ffffff;
 }
+#topmenu #logo { text-align: left; }
 #topmenu .span-4 { text-align: center; }
 #topmenu .span-6 { text-align: center; }
 #topmenu #plusone_button {
@@ -140,6 +141,11 @@ h4, h5, h6 { font-size: 14px; }
 #last_changes a { color: #888888; }
 #save_button { float: left; }
 #cancel_button { float: right; }
+#q {
+  font-size: 36px;
+  width: 100%;
+}
+#search_btn { font-size: 36px; }
 #file-uploader {
   float: right;
   text-shadow: none;
