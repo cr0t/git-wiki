@@ -26,15 +26,18 @@ $(document).ready(function () {
 	$("#create_new_page").click(function (e) {
 		e.preventDefault();
 
-		var site_path = prompt("Please, input the new page site path (short name), it will be available at: " + window.location.pathname + "/", "");
+		var example_path = window.location.pathname.replace("/edit", "");
 
-		if (site_path != null && site_path != "") {
-			// clean site path from some symbols
-			site_path = site_path.replace(/[ \.!@#$%^&*\(\)]+/g, "_");
-			window.location = window.location.pathname + "/" + site_path;
+		var site_path = prompt("Please, input the new page site path (short name), it will be available at: " + example_path + "/", "");
+
+		if (!site_path.match(/[0-9a-zA-Z-]+/gi)) {
+			alert("The page site path must have only ASCII and alphanumeric symbols.");
 		}
 		else {
-			alert("Please input the new page site path");
+			if (site_path != null && site_path != "") {
+				site_path = site_path.replace(/[ \.!@#$%^&*\(\)]+/g, "_");
+				window.location = example_path + "/" + site_path;
+			}
 		}
 	});
 
