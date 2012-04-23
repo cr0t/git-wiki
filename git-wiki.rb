@@ -89,7 +89,7 @@ module GitWiki
     end
 
     def self.files_extensions
-      /(png|jpg|jpeg|gif|doc|pdf|xls|rtf|txt)$/i
+      /(png|jpg|jpeg|gif|doc|pdf|xls|rtf|txt|sql)$/i
     end
 
     def self.find_blob(page_name)
