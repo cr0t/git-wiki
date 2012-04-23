@@ -146,6 +146,7 @@ h4, h5, h6 { font-size: 14px; }
   width: 100%;
 }
 #search_btn { font-size: 36px; }
+.delete_link { color: #8a1f11; }
 #file-uploader {
   float: right;
   text-shadow: none;

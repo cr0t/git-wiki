@@ -578,7 +578,7 @@ __END__
     #last_changes
       = list_last_changes
   #edit
-    %a{ :href => "/#{@page.site_path}/delete", :rel => "nofollow" } Delete
+    %a{ :href => "/#{@page.site_path}/delete", :rel => "nofollow", :class => "delete_link" } Delete
     |
     %a{ :href => "/#{@page.site_path}/history", :rel => "nofollow" } History
     |
