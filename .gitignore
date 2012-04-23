@@ -1,5 +1,4 @@
 *.log
 *.swp
 wiki
-.rvmrc
 tmp/*
