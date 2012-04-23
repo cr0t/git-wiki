@@ -1,3 +1,5 @@
+require 'bundler/capistrano'
+
 set :application, "com.summercode.wiki"
 set :repository,  "git@github.com:cr0t/git-wiki.git"
 
@@ -15,7 +17,7 @@ namespace :deploy do
   task :restart do
     run "/etc/unicorns/wiki restart"
   end
-  
+
   after "deploy:update" do
     deploy::cleanup
   end
