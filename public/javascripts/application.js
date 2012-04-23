@@ -16,6 +16,13 @@ $(document).ready(function () {
 		}
 	});
 
+	$(".delete_link").click(function (e) {
+		e.preventDefault();
+		if (confirm("Are you sure? Also, the non-leaf-pages or pages with uploaded files/images will not be deleted, ask developer.")) {
+			window.location = $(this).attr("href");
+		}
+	});
+
 	$("#create_new_page").click(function (e) {
 		e.preventDefault();
 
