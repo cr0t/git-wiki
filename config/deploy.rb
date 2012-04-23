@@ -1,5 +1,9 @@
 require 'bundler/capistrano'
 
+set :rvm_ruby_string, 'ruby-1.9.3-p125@git-wiki'
+set :rvm_type, :system
+require 'rvm/capistrano'
+
 set :application, "com.summercode.wiki"
 set :repository,  "git@github.com:cr0t/git-wiki.git"
 
