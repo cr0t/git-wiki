@@ -316,8 +316,7 @@ module GitWiki
     end
 
     get "/*/edit" do
-      # why browser want to "GET /favicon.ico/edit" ?
-      protected! if params[:splat][0] != "/favicon.ico"
+      protected!
       begin
         @page = Page.find_or_create(params[:splat][0])
         haml :edit
@@ -332,9 +331,18 @@ module GitWiki
     end
 
     get "/*/delete" do
+      protected!
+
       @page = Page.find(params[:splat][0])
+
+      path = Page.repository.working_dir + "/" + @page.site_path
+      unless File.exists?(path)
+        path += GitWiki.extension
+        File.unlink(path)
+        `cd #{Page.repository.working_dir} && git commit -am "deleted '#{path}' by #{@auth.credentials.first}"`
+      end
+
       redirect "/"
-      # haml :history
     end
 
     get "/*" do
@@ -372,7 +380,7 @@ module GitWiki
     end
 
     post "/*" do
-      protected! if params[:splat][0] != "/favicon.ico"
+      protected!
 
       @page = Page.find_or_create(params[:splat][0])
       @page.update_content(params[:body], @auth.credentials.first)
