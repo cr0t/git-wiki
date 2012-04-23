@@ -289,6 +289,7 @@ module GitWiki
         @stem = stemmer.stem(params[:q])
 
         ack_str = `which ack`.strip
+        ack_str = `which ack-grep`.strip if ack_str.length == 0
         ack_cmd = "#{ack_str} --flush --nogroup --nocolour -i #{@stem}"
         @raw_results = `cd #{$CONFIG['wiki_repo_path']} && #{ack_cmd}`
 
