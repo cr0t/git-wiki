@@ -1,5 +1,9 @@
 # -*- encoding: utf-8 -*-
 # coding: utf-8
+
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
 # This file is used by Rack-based servers to start the application.
 
 require File.dirname(__FILE__) + "/git-wiki"
