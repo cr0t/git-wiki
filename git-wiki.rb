@@ -1,9 +1,9 @@
 # coding: utf-8
 
-require "sinatra/base"
-require "haml"
-require "rdiscount"
-require "lingua/stemmer"
+require 'sinatra/base'
+require 'haml'
+require 'rdiscount'
+require 'lingua/stemmer'
 
 module GitWiki
   class << self
@@ -331,6 +331,12 @@ module GitWiki
       haml :history
     end
 
+    get "/*/delete" do
+      @page = Page.find(params[:splat][0])
+      redirect "/"
+      # haml :history
+    end
+
     get "/*" do
       @page = Page.find(params[:splat][0])
       matched_ext = params[:splat][0].match(Page.files_extensions)
@@ -572,6 +578,8 @@ __END__
     #last_changes
       = list_last_changes
   #edit
+    %a{ :href => "/#{@page.site_path}/delete", :rel => "nofollow" } Delete
+    |
     %a{ :href => "/#{@page.site_path}/history", :rel => "nofollow" } History
     |
     %a{ :href => "/#{@page.site_path}/edit", :rel => "nofollow" } Edit this page
