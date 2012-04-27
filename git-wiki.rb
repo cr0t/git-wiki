@@ -286,38 +286,62 @@ module GitWiki
         @error_msg = "You have not specified the query string"
         haml :search_form
       else
-        lang = "ru"
-        lang = "en" if params[:q].force_encoding("UTF-8").ascii_only?
-        stemmer = Lingua::Stemmer.new(:language => lang)
+        @query = params[:q].strip
+        lang  = "ru"
+        lang  = "en" if @query.force_encoding("UTF-8").ascii_only?
 
-        @stem = stemmer.stem(params[:q])
+        stemmer = Lingua::Stemmer.new(:language => lang)
 
         ack_str = `which ack`.strip
         ack_str = `which ack-grep`.strip if ack_str.length == 0
-        ack_cmd = "#{ack_str} --flush --nogroup --nocolour -i #{@stem}"
-        @raw_results = `cd #{$CONFIG['wiki_repo_path']} && #{ack_cmd}`
 
-        strings = @raw_results.split("\n")
+        words_results = []
 
-        found = {}
-        strings.each do |str|
-          meta_info  = str.split(":", 3)
-          filename   = meta_info[0].to_s
-          lineno     = meta_info[1].to_i
-          fount_text = meta_info[2]
-          if found.has_key? filename
-            found[filename][:hits] += 1
-          else
-            found[filename] = {
-              :hits => 1
-            }
+        words = @query.split /\s/
+        words.each do |word|
+          stem = stemmer.stem(word)
+          words_results << ack_search(ack_str, stem)
+        end
+
+        total_founds = {}
+        words_results.each do |result|
+          result.each_pair do |filename, hits_data|
+            if total_founds.has_key? filename
+              total_founds[filename][:hits] += hits_data[:hits]
+            else
+              total_founds[filename] = {
+                :hits => hits_data[:hits]
+              }
+            end
           end
         end
 
-        @search_results = found.sort_by { |f| f[1][:hits] }.reverse
+        @search_results = total_founds.sort_by { |f| f[1][:hits] }.reverse
 
         haml :search
       end
+    end
+
+    def ack_search(ack_str, stem)
+      ack_cmd = "#{ack_str} --flush --nogroup --nocolour -i #{stem}"
+      strings = `cd #{$CONFIG['wiki_repo_path']} && #{ack_cmd}`.split("\n")
+
+      found = {}
+      strings.each do |str|
+        meta_info  = str.split(":", 3)
+        filename   = meta_info[0].to_s
+        lineno     = meta_info[1].to_i
+        fount_text = meta_info[2]
+        if found.has_key? filename
+          found[filename][:hits] += 1
+        else
+          found[filename] = {
+            :hits => 1
+          }
+        end
+      end
+
+      found
     end
 
     get "/*/edit" do
@@ -675,10 +699,10 @@ var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
 #content
   .span-24.last
     %form{ :method => "post" }
-      %input{ :type => "text", :name => "q", :id => "q", :value => params[:q] }
+      %input{ :type => "text", :name => "q", :id => "q", :value => @query }
       %br
       %input{ :type => "submit", :value => "Search", :id => "search_btn" }
-  %h2 Search results for <strong>"#{params[:q]}"</strong> ("#{@stem}"):
+  %h2 Search results for <strong>"#{@query}"</strong>:
   .span-24.last
     %ol
       - @search_results.each do |file|
