@@ -333,7 +333,7 @@ module GitWiki
         meta_info  = str.split(":", 3)
         filename   = meta_info[0].to_s
         lineno     = meta_info[1].to_i
-        found_text = meta_info[2].gsub(/<\/?[^>]*>/, "")
+        found_text = meta_info[2].gsub(/<\/?[^>]*>/, "").gsub(/<img/, "&lt;img")
 
         if found.has_key? filename
           found[filename][:hits] += 1
