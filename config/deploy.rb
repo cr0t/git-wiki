@@ -1,6 +1,6 @@
 require 'bundler/capistrano'
 
-set :rvm_ruby_string, 'ruby-1.9.3-p125@git-wiki'
+set :rvm_ruby_string, 'ruby-1.9.3-p194@git-wiki'
 set :rvm_type, :system
 require 'rvm/capistrano'
 
