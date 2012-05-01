@@ -308,9 +308,11 @@ module GitWiki
           result.each_pair do |filename, hits_data|
             if total_founds.has_key? filename
               total_founds[filename][:hits] += hits_data[:hits]
+              total_founds[filename][:meta] += "\n" + hits_data[:meta]
             else
               total_founds[filename] = {
-                :hits => hits_data[:hits]
+                :hits => hits_data[:hits],
+                :meta => hits_data[:meta]
               }
             end
           end
@@ -331,12 +333,15 @@ module GitWiki
         meta_info  = str.split(":", 3)
         filename   = meta_info[0].to_s
         lineno     = meta_info[1].to_i
-        fount_text = meta_info[2]
+        found_text = meta_info[2].gsub(/<\/?[^>]*>/, "")
+
         if found.has_key? filename
           found[filename][:hits] += 1
+          found[filename][:meta] += "\n" + lineno.to_s + ":" + found_text
         else
           found[filename] = {
-            :hits => 1
+            :hits => 1,
+            :meta => lineno.to_s + ":" + found_text
           }
         end
       end
@@ -699,13 +704,17 @@ var LOCAL_IMAGES = [#{@page.list_images.map {|i| "'" + i + "'"}.join(",") }];
 #content
   .span-24.last
     %form{ :method => "post" }
-      %input{ :type => "text", :name => "q", :id => "q", :value => @query }
-      %br
-      %input{ :type => "submit", :value => "Search", :id => "search_btn" }
+      %p
+        %input{ :type => "text", :name => "q", :id => "q", :value => @query }
+        %br
+        %input{ :type => "submit", :value => "Search", :id => "search_btn" }
   %h2 Search results for <strong>"#{@query}"</strong>:
   .span-24.last
-    %ol
+    %p
+      %a{:href => "#", :id=>"toggle_results_details"} Toggle details
+    %ol#search_results
       - @search_results.each do |file|
         %li
           %a{:href=>"/#{file.first.gsub(/\.markdown/, '')}"} /#{file.first.gsub(/\.markdown/, '')}
-          = ", hits: #{file[1][:hits]}"
+          = " hits: #{file[1][:hits]}"
+          %pre #{file[1][:meta]}

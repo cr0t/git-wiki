@@ -82,6 +82,16 @@ $(document).ready(function () {
 		$("#content").css("line-height", new_line_height + "px");
 		$("#content p").css("margin-bottom", new_p_margin + "px");
 	});
+
+	if (getCookie("show_results_details") !== null && getCookie("show_results_details") === "block") {
+		$("pre").show();
+	}
+
+	$("#toggle_results_details").click(function (e) {
+		e.preventDefault();
+		$("pre").toggle();
+		setCookie("show_results_details", $("pre").css("display"));
+	});
 });
 
 function setCookie (name, value, expires, path, domain, secure) {
