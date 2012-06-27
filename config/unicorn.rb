@@ -3,7 +3,7 @@ APP_PATH = "/var/www/com.summercode.wiki"
 rails_env = ENV["RAILS_ENV"] || "development"
 
 # 2 workers and 1 master
-worker_processes 2
+worker_processes 1
 
 working_directory APP_PATH + "/current" # available in 0.94.0+
 
