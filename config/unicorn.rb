@@ -1,11 +1,11 @@
-APP_PATH = "/var/www/com.summercode.wiki"
+APP_PATH = '/var/www/com.summercode.wiki'
 
-rails_env = ENV["RAILS_ENV"] || "development"
+rails_env = ENV['RAILS_ENV'] || 'development'
 
 # 2 workers and 1 master
-worker_processes 1
+worker_processes 2
 
-working_directory APP_PATH + "/current" # available in 0.94.0+
+working_directory APP_PATH + '/current' # available in 0.94.0+
 
 # Load rails+github.git into the master before forking workers
 # for super-fast worker spawn times
@@ -15,11 +15,10 @@ preload_app true
 timeout 60
 
 # Listen on a Unix data socket
-listen "/tmp/.unicorn_wiki_sock", :backlog => 64
-
-pid APP_PATH + "/shared/pids/unicorn.pid"
-stderr_path APP_PATH + "/shared/log/unicorn.stderr.log"
-stdout_path APP_PATH + "/shared/log/unicorn.stdout.log"
+listen      APP_PATH + '/shared/system/unicorn.sock', :backlog => 64
+pid         APP_PATH + '/shared/pids/unicorn.pid'
+stderr_path APP_PATH + '/shared/log/unicorn.stderr.log'
+stdout_path APP_PATH + '/shared/log/unicorn.stdout.log'
 
 ##
 # REE
@@ -29,7 +28,7 @@ if GC.respond_to?(:copy_on_write_friendly=)
 end
 
 before_exec do |server|
- ENV['BUNDLE_GEMFILE'] = APP_PATH + "/current/Gemfile"
+  ENV['BUNDLE_GEMFILE'] = APP_PATH + '/current/Gemfile'
 end
 
 before_fork do |server, worker|
