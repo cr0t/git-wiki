@@ -1,9 +1,19 @@
 #!/bin/bash
 
+### BEGIN INIT INFO
+# Provides:          unicorn
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the unicorn web server
+# Description:       starts unicorn
+### END INIT INFO
+
 # Add to auto-start on server start
 # sudo update-rc.d unicorn_com.summercode.wiki defaults
 # Remove from auto-start
-# sudo update-rc.d unicorn_com.summercode.wiki remove
+# sudo update-rc.d -f unicorn_com.summercode.wiki remove
 
 RVM_ENV="ruby-1.9.3-p362@git-wiki"
 APP_NAME="com.summercode.wiki"
