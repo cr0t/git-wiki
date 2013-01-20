@@ -10,7 +10,7 @@ set :branch,      :master
 
 set :scm, :git
 
-role :web, 'summercode.com'
+role :web, '85.10.236.42'
 
 set :use_sudo, false
 set :deploy_to, "/var/www/#{application}"
