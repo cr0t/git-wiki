@@ -12,9 +12,10 @@ set :scm, :git
 
 role :web, '85.10.236.42'
 
-set :use_sudo, false
-set :deploy_to, "/var/www/#{application}"
+set :use_sudo,      false
+set :deploy_to,     "/var/www/#{application}"
 set :keep_releases, 5
+set :ssh_options,   { :forward_agent => true }
 
 namespace :deploy do
   desc 'Deploy your application'
