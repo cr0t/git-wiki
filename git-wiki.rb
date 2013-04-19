@@ -549,26 +549,26 @@ __END__
 !!!
 %html
   %head
-    %title= title
-    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    %meta(charset='utf-8')
+    %title = title
     = '<link rel="icon" href="/favicon.ico" type="image/x-icon"/>'
     = '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>'
-    = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection" type="text/css"/>'
-    = '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print" type="text/css"/>'
-    = '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css"/><![endif]-->'
+    = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection"/>'
+    = '<link rel="stylesheet" href="/stylesheets/blueprint/print.css" media="print"/>'
+    = '<!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css"/><![endif]-->'
     = '<!--[if IE]><style type="text/css">#topmenu{background-color:#fff;}</style><![endif]-->'
-    = '<link rel="stylesheet" href="/stylesheets/application.css?' + mtime("public/stylesheets/application.css") + '" media="screen, projection" type="text/css"/>'
-    = '<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css"/>'
-    = '<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>'
-    = '<script type="text/javascript" src="/javascripts/application.js?' + mtime("public/javascripts/application.js") + '"></script>'
+    = '<link rel="stylesheet" href="/stylesheets/application.css?mt=' + mtime("public/stylesheets/application.css") + '" media="screen, projection"/>'
+    = '<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Serif"/>'
+    = '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>'
+    = '<script src="/javascripts/application.js?mt=' + mtime("public/javascripts/application.js") + '"></script>'
     - if $CONFIG["show_tweet"]
-      = '<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'
+      = '<script>(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "http://platform.twitter.com/widgets.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>'
     - if $CONFIG["show_evernote"]
-      = '<script type="text/javascript" src="http://static.evernote.com/noteit.js"></script>'
+      = '<script>(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "http://static.evernote.com/noteit.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>'
     - if $CONFIG["show_plusone"]
-      = '<script type="text/javascript">(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>'
+      = '<script>(function() {var po = document.createElement("script"); po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s);})();</script>'
     - if $CONFIG["use_ga_tracking"]
-      = '<script type="text/javascript">/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
+      = '<script>/*<![CDATA[*/var _gaq=_gaq||[];_gaq.push(["_setAccount","' + $CONFIG["ga_account"] + '"]);_gaq.push(["_trackPageview"]);(function(){var ga=document.createElement("script");ga.type="text/javascript";ga.async=true;ga.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(ga,s);})();/*]]>*/</script>'
   %body
     #wrap
       #main.container.page
