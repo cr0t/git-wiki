@@ -550,7 +550,7 @@ __END__
 %html
   %head
     %meta(charset='utf-8')
-    %title = title
+    %title= title
     = '<link rel="icon" href="/favicon.ico" type="image/x-icon"/>'
     = '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>'
     = '<link rel="stylesheet" href="/stylesheets/blueprint/screen.css" media="screen, projection"/>'
