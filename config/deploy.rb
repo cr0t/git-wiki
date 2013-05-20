@@ -1,7 +1,8 @@
 require 'bundler/capistrano'
 require 'rvm/capistrano'
 
-set :rvm_ruby_string, 'ruby-1.9.3-p362@git-wiki'
+set :rvm_ruby_string, 'ruby-1.9.3-p429@git-wiki'
+set :rvm_path,        '/usr/local/rvm'
 set :rvm_type,        :system
 
 set :application, 'com.summercode.wiki'
